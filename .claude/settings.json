@@ -11,13 +11,24 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "COMMAND=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$COMMAND\" | grep -qE '^git (add|commit|push|pull|merge)'; then if [ -d \"memories/logs\" ]; then echo \"$(date '+%Y-%m-%d %H:%M:%S') | Git 操作: $COMMAND\" >> memories/logs/git_operations_$(date +%Y%m).log; fi; fi"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -d \"memories\" ]; then mkdir -p memories/logs memories/short_term && echo \"$(date '+%Y-%m-%d %H:%M:%S'): Claude Code 對話結束\" >> memories/logs/hook_$(date +%Y%m%d).log && echo \"最後更新時間: $(date '+%Y-%m-%d %H:%M:%S')\" > memories/short_term/last_session_updated.txt && echo '🔄 記憶體系統已更新'; fi"
+            "command": "if [ -d \"memories\" ]; then mkdir -p memories/logs memories/short_term && SESSION_INFO=\"$(date '+%Y-%m-%d %H:%M:%S') | 工作目錄: $(pwd) | 當前分支: $(git branch --show-current 2>/dev/null || echo 'N/A')\"; echo \"$SESSION_INFO\" >> memories/logs/sessions_$(date +%Y%m).log && echo -e \"最後工作時間: $(date '+%Y-%m-%d %H:%M:%S')\\n最後工作目錄: $(pwd)\\n最後 Git 分支: $(git branch --show-current 2>/dev/null || echo 'N/A')\" > memories/short_term/last_session.txt && echo '🔄 記憶體系統已更新'; fi"
           }
         ]
       }
