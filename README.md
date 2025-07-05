@@ -11,27 +11,42 @@ PDCA 是一個體現正確「質疑精神」的 AI 協作系統：
 
 ## 🚀 快速開始
 
-### 基本使用（在 Claude CLI 中）
+### 安裝
 
 ```bash
-# 在 Claude CLI 對話中使用 ! 前綴執行
-!pdca 建立一個部落格系統
-!pdca 優化資料庫查詢效能
-!pdca 設計微服務架構
+# 執行安裝腳本查看選項
+./install.sh
+
+# 或直接添加到 PATH（推薦）
+echo 'export PATH="/path/to/raiy-pdca-shokunin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### 基本使用
+
+```bash
+# 直接使用 pdca 命令
+pdca 建立一個部落格系統
+
+# 配合 Claude CLI 使用
+claude -p "$(pdca 優化資料庫查詢效能)"
+
+# 或在 Claude 對話中
+claude -p "pdca 設計微服務架構"
 ```
 
 ### 極簡模式（適合快速決策）
 
 ```bash
-!pdca_mini 做個網站
+pdca_mini 做個網站
 ```
 
 ### 狀態管理
 
 ```bash
-!pdca status    # 查看當前任務狀態
-!pdca stop      # 停止當前任務
-!pdca help      # 顯示幫助信息
+pdca status    # 查看當前任務狀態
+pdca stop      # 停止當前任務
+pdca help      # 顯示幫助信息
 ```
 
 ## 💬 互動指令

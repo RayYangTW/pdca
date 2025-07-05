@@ -66,21 +66,66 @@ def show_help():
 🎯 PDCA 多代理協調系統
 
 使用方式：
-  !pdca [任務描述]     啟動 PDCA 協調流程
-  !pdca status        查看當前任務狀態
-  !pdca stop          停止當前任務
-  !pdca help          顯示此幫助
+  pdca [任務描述]     啟動 PDCA 協調流程
+  pdca status         查看當前任務狀態
+  pdca stop           停止當前任務
+  pdca help           顯示此幫助
 
 範例：
-  !pdca 建立用戶登入系統
-  !pdca 優化資料庫查詢效能
-  !pdca 設計微服務架構
+  pdca 建立用戶登入系統
+  pdca 優化資料庫查詢效能
+  pdca 設計微服務架構
+
+與 Claude 整合：
+  claude -p "$(pdca 建立登入系統)"
 
 注意：
-- 使用 ! 前綴在 Claude CLI 中執行 shell 命令
-- 任務啟動後，Claude 會作為協調者接手處理
-- 您可以在對話中繼續與 Claude 互動調整方向
+- 直接執行 pdca 命令會輸出協調內容
+- 可配合 claude -p 使用來啟動 AI 協調
+- 任務狀態會記錄在 .pdca/ 目錄中
     """)
+
+def generate_pdca_output(task_description):
+    """生成 PDCA 協調輸出"""
+    output = f"""# 🎯 PDCA 多代理協調系統
+
+## 任務：{task_description}
+
+作為 **[協調者]**，我將啟動四大專家協作來處理這個任務：
+
+### 🎨 [設計專家] - 架構設計
+請分析需求並提出技術方案，記住要：
+- 🤔 質疑設計決策的合理性
+- 🔍 搜尋業界最佳實踐
+- 💎 追求優雅可擴展的架構
+
+### 💻 [開發專家] - 程式實作
+基於設計方案進行實作，確保：
+- 🤔 質疑實作方式是否最優
+- 🔍 搜尋最新技術和工具
+- 💎 追求高品質的代碼
+
+### 🔍 [品質專家] - 測試驗證
+驗證實作品質，要求：
+- 🤔 質疑測試覆蓋率是否充分
+- 🔍 搜尋最新測試方法
+- 💎 追求零缺陷品質
+
+### 🚀 [優化專家] - 性能改善
+分析並優化系統，注重：
+- 🤔 質疑是否解決根本問題
+- 🔍 搜尋優化最佳實踐
+- 💎 追求系統性改善
+
+## 執行 PDCA 循環
+1. **Plan**: 設計專家分析需求，提出方案
+2. **Do**: 開發專家實作功能
+3. **Check**: 品質專家驗證品質
+4. **Act**: 優化專家提出改善
+
+請開始協調處理任務：{task_description}"""
+    
+    return output
 
 def main():
     """主入口函數"""
@@ -101,28 +146,15 @@ def main():
     elif command == "stop":
         stop_task()
     
-    elif command == "start":
-        print("🚀 PDCA 系統已準備就緒")
-        print("請使用 !pdca [任務描述] 來啟動具體任務")
-    
     else:
-        # 將第一個參數開始的所有內容視為任務描述
+        # 將所有參數視為任務描述
         task_description = " ".join(args)
-        task_data = create_task_file(task_description)
         
-        print("🎯 PDCA 任務已啟動")
-        print("=" * 40)
-        print(f"任務: {task_description}")
-        print(f"時間: {task_data['created_at']}")
-        print("=" * 40)
-        print()
-        print("📋 Claude 正在作為協調者接手處理...")
-        print("💬 您可以繼續在對話中與 Claude 互動調整方向")
-        print()
-        print("💡 提示：")
-        print("  - 使用 !pdca status 查看進度")
-        print("  - 使用 !pdca stop 停止任務")
-        print("  - 直接與 Claude 對話來介入和調整")
+        # 創建任務檔案（記錄用）
+        create_task_file(task_description)
+        
+        # 直接輸出 PDCA 協調內容
+        print(generate_pdca_output(task_description))
 
 if __name__ == "__main__":
     main()
