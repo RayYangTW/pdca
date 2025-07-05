@@ -1,0 +1,29 @@
+name: pdca
+description: PDCA 多代理協調系統命令
+version: 1.0.0
+
+commands:
+  - name: pdca
+    description: 啟動 PDCA 多代理協調系統
+    pattern: "^pdca\\s+(.+)$"
+    examples:
+      - "pdca 建立登入系統"
+      - "pdca 優化網站性能"
+      - "pdca 設計資料庫架構"
+    
+  - name: pdca-status
+    description: 查看 PDCA 任務狀態
+    pattern: "^pdca status$"
+    
+  - name: pdca-stop
+    description: 停止當前 PDCA 任務
+    pattern: "^pdca stop$"
+    
+  - name: pdca-logs
+    description: 查看 PDCA 執行日誌
+    pattern: "^pdca logs$"
+
+settings:
+  workspace: .pdca
+  enable_async: false  # 初期先用同步模式
+  show_thinking: true  # 顯示代理思考過程
