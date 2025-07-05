@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null | grep -q '^git commit'; then echo '🔍 檢查 Git 提交格式...'; COMMIT_MSG=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if ! echo \"$COMMIT_MSG\" | grep -qE '\\[20[0-9]{6}\\]'; then echo '❌ 提交格式錯誤：必須包含 [YYYYMMDD] 格式' >&2; exit 1; fi; if echo \"$COMMIT_MSG\" | grep -qiE '(AI|Claude|Anthropic|LLM|機器人|自動生成|Generated|Automated|Bot|Assistant|🤖)'; then echo '❌ 提交訊息包含禁止詞彙' >&2; exit 1; fi; echo '✅ Git 提交格式檢查通過'; fi"
+            "command": "COMMAND=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if echo \"$COMMAND\" | grep -q '^git commit'; then echo '🔍 檢查 Git 提交格式...'; if ! echo \"$COMMAND\" | grep -qE '\\[20[0-9]{6}\\]'; then echo '❌ 提交格式錯誤：必須包含 [YYYYMMDD] 格式' >&2; exit 1; fi; if echo \"$COMMAND\" | grep -qiE '(AI|Claude|Anthropic|LLM|機器人|自動生成|Generated|Automated|Bot|Assistant|🤖)'; then echo '❌ 提交訊息包含禁止詞彙' >&2; exit 1; fi; echo '✅ Git 提交格式檢查通過'; fi; if echo \"$COMMAND\" | grep -qE 'ln -s'; then echo '❌ 避免創建符號連結：Google Drive 同步衝突' >&2; exit 1; fi"
           }
         ]
       }
