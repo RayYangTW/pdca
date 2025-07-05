@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null | grep -q '^git commit'; then echo '🔍 檢查 Git 提交格式...'; COMMIT_MSG=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command' 2>/dev/null); if ! echo \"$COMMIT_MSG\" | grep -qE '\\[20[0-9]{6}\\]'; then echo '❌ 提交格式錯誤：必須包含 [YYYYMMDD] 格式' >&2; exit 1; fi; if echo \"$COMMIT_MSG\" | grep -qiE '(AI|Claude|Anthropic|LLM|機器人|自動生成|Generated|Automated|Bot|Assistant|🤖)'; then echo '❌ 提交訊息包含禁止詞彙' >&2; exit 1; fi; echo '✅ Git 提交格式檢查通過'; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -d \"memories\" ]; then mkdir -p memories/logs memories/short_term && echo \"$(date '+%Y-%m-%d %H:%M:%S'): Claude Code 對話結束\" >> memories/logs/hook_$(date +%Y%m%d).log && echo \"最後更新時間: $(date '+%Y-%m-%d %H:%M:%S')\" > memories/short_term/last_session_updated.txt && echo '🔄 記憶體系統已更新'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
