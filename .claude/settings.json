@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -d \"memories\" ]; then mkdir -p memories/logs memories/short_term && SESSION_INFO=\"$(date '+%Y-%m-%d %H:%M:%S') | 工作目錄: $(pwd) | 當前分支: $(git branch --show-current 2>/dev/null || echo 'N/A')\"; echo \"$SESSION_INFO\" >> memories/logs/sessions_$(date +%Y%m).log && echo -e \"最後工作時間: $(date '+%Y-%m-%d %H:%M:%S')\\n最後工作目錄: $(pwd)\\n最後 Git 分支: $(git branch --show-current 2>/dev/null || echo 'N/A')\" > memories/short_term/last_session.txt && echo '🔄 記憶體系統已更新'; fi"
+            "command": "if [ -d \"memories\" ]; then mkdir -p memories/logs memories/short_term && SESSION_INFO=\"$(date '+%Y-%m-%d %H:%M:%S') | 工作目錄: $(pwd) | 當前分支: $(git branch --show-current 2>/dev/null || echo 'N/A')\"; echo \"$SESSION_INFO\" >> memories/logs/sessions_$(date +%Y%m).log && echo -e \"# 最後會話記錄\\n\\n- **最後工作時間**: $(date '+%Y-%m-%d %H:%M:%S')\\n- **最後工作目錄**: $(pwd)\\n- **最後 Git 分支**: $(git branch --show-current 2>/dev/null || echo 'N/A')\\n- **專案名稱**: $(basename $(pwd))\" > memories/short_term/last_session.md && echo '🔄 記憶體系統已更新'; fi"
           }
         ]
       }
