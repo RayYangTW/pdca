@@ -9,7 +9,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # 方案 1：建立軟連結（需要 sudo）
 echo ""
 echo "方案 1：建立系統軟連結"
-echo "執行命令：sudo ln -sf $SCRIPT_DIR/pdca /usr/local/bin/pdca"
+echo "執行命令："
+echo "  sudo ln -sf $SCRIPT_DIR/pdca /usr/local/bin/pdca"
+echo "  sudo ln -sf $SCRIPT_DIR/pdca-recorder /usr/local/bin/pdca-recorder"
 echo "需要輸入系統密碼"
 echo ""
 
@@ -31,6 +33,7 @@ echo "請將以下內容加入您的 shell 配置檔："
 echo ""
 echo "# PDCA 命令別名"
 echo "alias pdca='$SCRIPT_DIR/pdca'"
+echo "alias pdca-recorder='$SCRIPT_DIR/pdca-recorder'"
 echo ""
 
 echo "========================"
