@@ -85,13 +85,13 @@ def show_help():
 - 任務狀態會記錄在 .pdca/ 目錄中
     """)
 
-def generate_pdca_output(task_description):
+def generate_pdca_output(task_description, enable_recorder=True):
     """生成 PDCA 協調輸出"""
-    output = f"""# 🎯 PDCA 多代理協調系統
+    output = f"""# 🎯 PDCA 多代理協調系統 2.0
 
 ## 任務：{task_description}
 
-作為 **[協調者]**，我將啟動四大專家協作來處理這個任務：
+作為 **[協調者]**，我將啟動五大專家協作來處理這個任務：
 
 ### 🎨 [設計專家] - 架構設計
 請分析需求並提出技術方案，記住要：
@@ -115,13 +115,33 @@ def generate_pdca_output(task_description):
 分析並優化系統，注重：
 - 🤔 質疑是否解決根本問題
 - 🔍 搜尋優化最佳實踐
-- 💎 追求系統性改善
+- 💎 追求系統性改善"""
+    
+    if enable_recorder:
+        output += """
+
+### 📝 [記錄代理] - 知識守護者
+非同步記錄所有互動，智能分類存儲：
+- 🤔 監聽專家討論和決策過程
+- 📊 分析關鍵洞察和經驗教訓
+- 💾 智能分類存儲到對應記憶庫
+- 🔍 建立知識索引便於未來查詢
+
+記憶分類：
+- **decisions/** - 重要技術決策和架構選擇
+- **solutions/** - 具體問題的解決方案
+- **patterns/** - 發現的設計模式和最佳實踐
+- **learnings/** - 錯誤教訓和改進心得
+- **progress/** - 任務進度和里程碑記錄"""
+    
+    output += f"""
 
 ## 執行 PDCA 循環
 1. **Plan**: 設計專家分析需求，提出方案
 2. **Do**: 開發專家實作功能
 3. **Check**: 品質專家驗證品質
 4. **Act**: 優化專家提出改善
+5. **Record**: 記錄代理持續記錄知識（非同步）
 
 請開始協調處理任務：{task_description}"""
     
@@ -147,14 +167,30 @@ def main():
         stop_task()
     
     else:
-        # 將所有參數視為任務描述
-        task_description = " ".join(args)
+        # 檢查是否有 --no-recorder 參數
+        enable_recorder = True
+        filtered_args = []
+        
+        for arg in args:
+            if arg == "--no-recorder":
+                enable_recorder = False
+            else:
+                filtered_args.append(arg)
+        
+        # 將過濾後的參數視為任務描述
+        task_description = " ".join(filtered_args)
         
         # 創建任務檔案（記錄用）
-        create_task_file(task_description)
+        task_data = create_task_file(task_description)
+        
+        # 如果啟用記錄代理，創建記憶分類目錄
+        if enable_recorder:
+            memories_dir = Path("memories")
+            for subdir in ["decisions", "solutions", "patterns", "learnings", "progress"]:
+                (memories_dir / subdir).mkdir(parents=True, exist_ok=True)
         
         # 直接輸出 PDCA 協調內容
-        print(generate_pdca_output(task_description))
+        print(generate_pdca_output(task_description, enable_recorder))
 
 if __name__ == "__main__":
     main()
