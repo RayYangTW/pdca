@@ -5,7 +5,7 @@
 ## 🎌 系統啟動
 
 ```bash
-python3 .pdca-shokunin/launcher.py "$ARGUMENTS"
+pdca -s "$ARGUMENTS"
 ```
 
 這將創建真正的多代理非同步協作環境：
