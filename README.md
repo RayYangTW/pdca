@@ -4,42 +4,75 @@
 
 ## 🚀 快速開始
 
-### 方式一：npm 全局安裝（推薦）
+### npm 全局安裝（推薦）
 ```bash
-# 安裝
+# 安裝套件
 npm install -g pdca-shokunin
 
-# 在專案中初始化
-pdca-shokunin init
+# 選擇性設置斜線指令
+pdca setup-commands          # 安裝到當前專案
+pdca setup-commands --global # 安裝到全域（任何專案可用）
+
+# 驗證安裝狀態
+pdca verify-setup
 
 # 啟動系統
-pdca-shokunin "建立用戶登入系統"
-```
-
-### 方式二：Shell 腳本安裝
-```bash
-# 使用 curl
-curl -sL https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
-
-# 或使用 wget
-wget -qO- https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
-```
-
-### 安裝後使用
-```bash
-# 方式一：使用 -s 參數啟動 Shokunin 模式（推薦）
 pdca -s "建立用戶登入系統"
-
-# 方式二：在 Claude CLI 中使用斜線指令
-/pdca "建立用戶登入系統"
-
-# 快速管理指令
-pdca status                    # 查看運行狀態
-pdca stop                      # 停止系統
-pdca init                      # 初始化專案
 ```
 
-**特色**：本系統採用「職人精神」設計，現已全面升級為 TypeScript 版本，支援 `pdca -s` 指令格式。詳細說明請參考 [INSTALLATION.md](./INSTALLATION.md)。
+### 🎯 三種使用方式
+
+#### 1. CLI 指令模式（推薦）
+```bash
+pdca -s "建立用戶登入系統"
+pdca -s "優化資料庫性能"
+pdca -s "設計微服務架構"
+```
+
+#### 2. Claude Code 斜線指令模式 🆕
+在任何專案的 Claude Code 中使用：
+```bash
+/pdca "建立用戶登入系統"
+/pdca "優化資料庫性能" 
+/pdca "設計微服務架構"
+```
+
+#### 3. 管理指令
+```bash
+pdca status                      # 查看運行狀態
+pdca stop                        # 停止系統
+pdca init                        # 初始化專案
+pdca setup-commands              # 安裝斜線指令到當前專案
+pdca setup-commands --global     # 安裝斜線指令到全域
+pdca remove-commands             # 移除當前專案的斜線指令
+pdca remove-commands --global    # 移除全域斜線指令
+pdca verify-setup                # 驗證安裝狀態
+```
+
+### 🔧 斜線指令設置
+
+斜線指令讓您在任何專案的 Claude Code 中使用 `/pdca` 指令：
+
+```bash
+# 專案級安裝（只在當前專案可用）
+pdca setup-commands
+
+# 全域安裝（任何專案都可用）
+pdca setup-commands --global
+
+# 強制覆蓋已存在的指令
+pdca setup-commands --force
+pdca setup-commands --global --force
+
+# 移除斜線指令
+pdca remove-commands             # 移除當前專案
+pdca remove-commands --global    # 移除全域
+
+# 檢查設置狀態
+pdca verify-setup
+```
+
+**設計哲學**：本系統採用「職人精神」設計，全面升級為 TypeScript 版本。用戶可以自由選擇專案級或全域斜線指令，無論哪種方式都能零配置啟動真正的 5 代理並行協作。
 
 ### 查看狀態
 ```bash
