@@ -1,0 +1,16 @@
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+pdca_shokunin/__init__.py
+pdca_shokunin/agents.py
+pdca_shokunin/cli.py
+pdca_shokunin/core.py
+pdca_shokunin.egg-info/Icon
+pdca_shokunin.egg-info/PKG-INFO
+pdca_shokunin.egg-info/SOURCES.txt
+pdca_shokunin.egg-info/dependency_links.txt
+pdca_shokunin.egg-info/entry_points.txt
+pdca_shokunin.egg-info/not-zip-safe
+pdca_shokunin.egg-info/requires.txt
+pdca_shokunin.egg-info/top_level.txt
