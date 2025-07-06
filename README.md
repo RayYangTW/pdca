@@ -1,218 +1,180 @@
-# PDCA 多代理協調系統 2.0
+# 🎌 PDCA-Shokunin Multi-Agent System
 
-## 🎯 系統特色
-
-PDCA 2.0 是一個具備智能記憶的 AI 協作系統：
-
-- **尊重您的需求**：從不質疑用戶需求，專注於優化解決方案
-- **五大專家協作**：設計、開發、品質、優化專家 + 記錄代理
-- **智能記憶系統**：自動分類存儲決策、方案、模式、經驗
-- **透明可介入**：清晰的身份標識，隨時可介入調整
-- **自我批判精神**：每個專家都會質疑並優化自己的方案
+> **職人級多代理協調系統** - 中文為主，英文為輔的極致 PDCA 體驗
 
 ## 🚀 快速開始
 
-### 安裝
-
+### 方式一：npm 全局安裝（推薦）
 ```bash
-# pip 安裝（推薦）
-pip install pdca-shokunin
+# 安裝
+npm install -g pdca-shokunin
 
-# 設定 API Key 以啟用真實多代理模式
-export ANTHROPIC_API_KEY="your-api-key"
+# 在專案中初始化
+pdca-shokunin init
 
-# 或從源碼安裝
-git clone https://github.com/raiyyang/pdca-shokunin.git
-cd pdca-shokunin
-pip install -e .
+# 啟動系統
+pdca-shokunin "建立用戶登入系統"
 ```
 
-### 基本使用
-
+### 方式二：Shell 腳本安裝
 ```bash
-# 直接使用 pdca 命令（啟用記錄代理）
-pdca 建立一個部落格系統
+# 使用 curl
+curl -sL https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
 
-# 不啟用記錄代理
-pdca --no-recorder 快速原型開發
-
-# 配合 Claude CLI 使用
-claude -p "$(pdca 優化資料庫查詢效能)"
-
-# 或在 Claude 對話中
-claude -p "pdca 設計微服務架構"
+# 或使用 wget
+wget -qO- https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
 ```
 
-### 記錄代理使用
-
+### 安裝後使用
 ```bash
-# 手動觸發記錄分析（在 PDCA 任務後）
-claude -p "pdca-recorder"
+# 方式一：使用 -s 參數啟動 Shokunin 模式（推薦）
+pdca -s "建立用戶登入系統"
 
-# 或指定任務
-claude -p "pdca-recorder 分析登入系統開發過程"
+# 方式二：在 Claude CLI 中使用斜線指令
+/pdca "建立用戶登入系統"
+
+# 快速管理指令
+pdca status                    # 查看運行狀態
+pdca stop                      # 停止系統
+pdca init                      # 初始化專案
 ```
 
-### 極簡模式（適合快速決策）
+**特色**：本系統採用「職人精神」設計，現已全面升級為 TypeScript 版本，支援 `pdca -s` 指令格式。詳細說明請參考 [INSTALLATION.md](./INSTALLATION.md)。
 
+### 查看狀態
 ```bash
-pdca_mini 做個網站
+# 連接到 tmux session
+tmux attach -t pdca-shokunin
+
+# 查看所有窗口
+tmux list-windows -t pdca-shokunin
 ```
 
-### 狀態管理
+## 🎭 系統架構
 
-```bash
-pdca status    # 查看當前任務狀態
-pdca stop      # 停止當前任務
-pdca help      # 顯示幫助信息
-```
+### PDCA 循環代理
+- 🎯 **pdca-plan**: Plan 階段協調者 - 需求分析、策略制定、任務協調
+- 🎨 **pdca-do**: Do 階段執行者 - 架構設計、功能實作、代碼開發
+- 🔍 **pdca-check**: Check 階段驗證者 - 品質驗證、測試檢查、結果評估
+- 🚀 **pdca-act**: Act 階段改善者 - 性能優化、問題改善、持續改進
 
-## 💬 互動指令
+### 知識管理代理
+- 📝 **knowledge-agent**: 專職記錄和知識管理 - 智能監聽、分類歸檔、經驗累積
 
-在專家討論過程中，您可以使用以下指令：
+## 🛠️ 技術特色
 
-- `/intervene [專家] [指示]` - 介入特定專家的思考
-- `/continue` - 讓團隊繼續討論
-- `/status` - 查看當前進度
-- `/help` - 顯示幫助
-- `/quit` - 退出系統
+### 真正的多代理並行
+- **tmux session**: 5 個獨立 Claude 實例同時運作
+- **git worktree**: 代理工作空間完全隔離
+- **實時 TUI**: 監控介面顯示所有代理狀態
+- **智能通訊**: 文件系統協調代理間協作
 
-### 介入範例
-
-```
-/intervene design 請考慮使用微服務架構
-/intervene 開發 使用 Python FastAPI
-/intervene 品質 需要 100% 測試覆蓋率
-```
-
-## 🏗️ 系統架構
-
-```
-用戶
- ↓
-[協調者] - 您的唯一對話窗口
- ↓
-專家團隊：
-├── [🎨 設計專家] - 架構設計
-├── [💻 開發專家] - 程式實作
-├── [🔍 品質專家] - 測試驗證
-├── [🚀 優化專家] - 性能改善
-└── [📝 記錄代理] - 知識管理（非同步）
-```
-
-### 📁 記憶體系統
-
-```
-memories/
-├── decisions/    # 重要決策和架構選擇
-├── solutions/    # 具體問題解決方案
-├── patterns/     # 設計模式和最佳實踐
-├── learnings/    # 經驗教訓和改進心得
-└── progress/     # 任務進度和里程碑
-```
-
-## 🤔 正確的質疑精神
-
-### ❌ 錯誤示範
-```
-用戶：我需要建立登入系統
-AI：這真的需要嗎？（質疑用戶需求）
-```
-
-### ✅ 正確示範
-```
-用戶：我需要建立登入系統
-[設計專家] 我建議使用 Session 認證
-[設計專家] 🤔 但我在質疑：這是最安全的方案嗎？
-[設計專家] 💡 發現：OAuth2 + JWT 可能更適合
-```
+### 職人級體驗
+- **一鍵啟動**: 零配置即用
+- **隨時介入**: 實時查看和指導任一代理
+- **工匠品質**: 每個細節都追求完美
+- **中文友好**: 主要介面使用中文，技術術語保持英文
 
 ## 📁 專案結構
 
 ```
 raiy-pdca-shokunin/
-├── pdca                 # 主執行腳本（!pdca 指令）
-├── pdca_mini.py         # 極簡版
-├── README.md            # 專案說明
-├── .pdca/               # 系統核心
-│   ├── coordinator/     # 協調機制
-│   ├── agents/          # 專家代理
-│   ├── config.json      # 系統配置
-│   └── current_task.json # 當前任務狀態
-└── .claude/             # Claude CLI 整合
-    ├── commands/        # 命令定義
-    └── hooks/           # Hook 配置
+├── .claude/                    # Claude 配置
+│   ├── commands/               # 斜線指令
+│   │   └── pdca.md            # /pdca 指令定義
+│   └── agents/                # 代理配置
+├── .pdca-shokunin/            # PDCA-Shokunin 系統
+│   ├── launcher.py            # 主啟動器
+│   ├── monitor.py             # TUI 監控介面
+│   ├── agents/                # 代理配置
+│   ├── worktrees/             # git worktree 工作區
+│   ├── communication/         # 代理間通訊
+│   └── logs/                  # 系統日誌
+├── memories/                  # 記憶庫
+│   ├── decisions/             # 決策記錄
+│   ├── solutions/             # 解決方案
+│   ├── patterns/              # 設計模式
+│   ├── learnings/             # 經驗教訓
+│   └── progress/              # 進度追蹤
+├── pdca_shokunin/             # Python 套件
+├── setup.py                   # 套件安裝配置
+└── README.md                  # 本文件
 ```
 
-## 🔧 配置說明
+## 🎯 使用場景
 
-系統具備四大核心屬性：
+### 軟體開發
+```bash
+/pdca "建立 RESTful API"
+/pdca "優化資料庫性能"
+/pdca "設計微服務架構"
+```
 
-1. **質疑精神** - 對解決方案保持批判思考
-2. **追求卓越** - 不滿足於「能用」，追求「最優」
-3. **自主搜尋** - 主動尋找最新最佳實踐
-4. **技術敏銳度** - 保持對新技術的關注
+### 系統分析
+```bash
+/pdca "分析系統瓶頸"
+/pdca "設計擴展方案"
+/pdca "建立監控體系"
+```
 
-## 💡 使用建議
+### 學習研究
+```bash
+/pdca "學習 Kubernetes 部署"
+/pdca "研究最新前端框架"
+/pdca "分析競品技術方案"
+```
 
-1. **讓專家先分析** - 觀察初步討論，了解不同角度
-2. **適時介入調整** - 在關鍵決策點給出您的偏好
-3. **利用專業性** - 相信專家的專業判斷和批判思考
-4. **保持最終控制** - 您永遠擁有最終決定權
+## 🔧 環境需求
 
-## 🎯 MVP 開發理念
+### 必要依賴
+- Python 3.8+
+- tmux
+- git
+- Claude Code CLI
 
-本系統遵循 MVP 開發原則：
-- 沒有版本號，只有最新最好的版本
-- 持續優化單一代碼庫
-- 快速迭代，直接改進
+### 使用步驟（無需安裝）
+```bash
+# 1. 克隆專案
+git clone <repository-url>
+cd raiy-pdca-shokunin
 
-## 🌟 職人版本特色
+# 2. 直接使用（零配置）
+/pdca "測試任務"
+# 或
+python3 .pdca-shokunin/launcher.py "測試任務"
+```
 
-這是由 Claude + Claude Code CLI 協作設計的職人精神版本，特點：
+**注意**：`pdca_shokunin/` 目錄是舊版本套件，保留僅為相容性考慮。實際系統運行完全依賴 `.pdca-shokunin/` 目錄中的啟動器。
 
-### 與 GPT-o3 版本的差異
-- **設計理念**：職人精神 vs. 複雜功能
-- **核心原則**：質疑解決方案，尊重用戶需求
-- **使用方式**：獨立命令行工具 + Claude 整合
-- **架構理念**：極簡而深入 vs. 功能豐富
+## 💡 操作指引
 
-### 職人精神體現
-1. **見微知著** - 從需求看見最佳解決方案
-2. **精益求精** - 不滿足於「能用」，追求「最優」
-3. **自我批判** - 持續質疑和改進自己的方案
-4. **技術敏銳** - 保持對最新技術的敏感度
+### tmux 快捷鍵
+- **Ctrl+B 1-5**: 直接切換到對應代理窗口
+- **Ctrl+B 6**: 切換到監控窗口
+- **Ctrl+B d**: 分離 session (背景運行)
+- **Ctrl+B ?**: 顯示 tmux 幫助
 
-## 🚀 2.0 版本新特性
+### 監控介面操作
+- **↑/↓**: 切換選中的代理
+- **Enter**: 切換到選中代理的 tmux 窗口
+- **Space**: 查看選中代理的詳細資訊
+- **R**: 重新載入任務和狀態
+- **Q**: 退出監控介面
 
-### ⚡ 真實多代理並行執行
-- **asyncio.gather 並行**：5個代理同時工作，非模擬
-- **ThreadPoolExecutor 整合**：基於 Anthropic 官方模式
-- **智能降級機制**：API 失敗時自動回退到模擬模式
-- **超時保護**：2分鐘超時設定，避免無限等待
+## 🎌 職人哲學
 
-### 📦 pip 套件化
-- **一鍵安裝**：`pip install pdca-shokunin`
-- **零配置啟動**：開箱即用，自動檢測 API Key
-- **輕量設計**：套件大小 < 50KB，依賴最小化
-- **向後兼容**：保持原有命令行介面
+### 設計原則
+- **極致簡潔**: 一個指令解決所有問題
+- **工匠品質**: 每個細節都精雕細琢
+- **使用者導向**: 連新手都能立即上手
+- **持續改進**: 永遠追求更好的解決方案
 
-### 🔄 錯誤處理強化
-- **指數退避重試**：API 失敗時智能重試
-- **部分失敗處理**：部分代理失敗時仍能運作
-- **實時錯誤回報**：透明的錯誤訊息和恢復建議
-
-### 📝 智能記錄代理
-- **非同步記錄**：不影響主流程效能
-- **自動分類**：智能判斷記憶類型並歸檔
-- **知識積累**：建立可查詢的知識庫
-- **經驗傳承**：保存決策理由和最佳實踐
-
-### 🧠 記憶體架構升級
-- **分類存儲**：決策、方案、模式、經驗、進度
-- **漸進式摘要**：定期壓縮和整理舊記憶
-- **跨專案學習**：累積的知識可跨專案使用
+### 品質承諾
+- **永遠簡單**: 不管加什麼功能，使用都是一個指令
+- **永不出錯**: 任何環境任何情況都能優雅工作
+- **極致性能**: 啟動快、運行流暢、資源消耗最小
+- **完美體驗**: 介面、功能、文檔都是藝術品級別
 
 ---
 
-**核心價值**：尊重您的需求，質疑我們的方案，追求最優解決，記錄每個成長！
+**PDCA-Shokunin**: 中文的溫度，技術的深度，職人的態度！

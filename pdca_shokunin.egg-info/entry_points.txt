@@ -1,3 +1,0 @@
-[console_scripts]
-pdca = pdca_shokunin.cli:main
-pdca-recorder = pdca_shokunin.cli:recorder_main

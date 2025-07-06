@@ -1,0 +1,231 @@
+#!/usr/bin/env node
+
+/**
+ * PDCA-Shokunin CLI
+ * 職人級多代理協調系統 - Node.js 執行入口
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+const chalk = require('chalk');
+const commander = require('commander');
+const ora = require('ora');
+
+const program = new commander.Command();
+
+// 版本資訊
+program
+  .name('pdca-shokunin')
+  .description('🎌 PDCA-Shokunin 職人級多代理協調系統')
+  .version('3.0.0');
+
+// 主命令：啟動 PDCA 系統
+program
+  .argument('<task>', '任務描述')
+  .option('-d, --detach', '背景執行')
+  .option('-m, --monitor', '直接進入監控模式')
+  .option('--no-color', '關閉顏色輸出')
+  .action((task, options) => {
+    startPDCA(task, options);
+  });
+
+// init 子命令：初始化當前專案
+program
+  .command('init')
+  .description('在當前專案初始化 PDCA-Shokunin')
+  .option('-f, --force', '強制覆蓋現有配置')
+  .action((options) => {
+    initProject(options);
+  });
+
+// status 子命令：查看運行狀態
+program
+  .command('status')
+  .description('查看 PDCA-Shokunin 運行狀態')
+  .action(() => {
+    checkStatus();
+  });
+
+// stop 子命令：停止系統
+program
+  .command('stop')
+  .description('停止 PDCA-Shokunin 系統')
+  .action(() => {
+    stopSystem();
+  });
+
+// 解析命令行參數
+program.parse();
+
+/**
+ * 啟動 PDCA 系統
+ */
+function startPDCA(task, options) {
+  console.log(chalk.blue.bold('🎌 PDCA-Shokunin Multi-Agent System'));
+  console.log(chalk.gray('═'.repeat(50)));
+  console.log(chalk.yellow(`📋 任務: ${task}`));
+  console.log();
+
+  const spinner = ora('檢查系統需求...').start();
+
+  // 檢查 Python
+  const pythonCheck = spawn('python3', ['--version']);
+  pythonCheck.on('error', () => {
+    spinner.fail('Python 3 未安裝');
+    console.log(chalk.red('請安裝 Python 3.8 或更高版本'));
+    process.exit(1);
+  });
+
+  pythonCheck.on('close', (code) => {
+    if (code !== 0) {
+      spinner.fail('Python 檢查失敗');
+      process.exit(1);
+    }
+
+    // 檢查 tmux
+    const tmuxCheck = spawn('tmux', ['-V']);
+    tmuxCheck.on('error', () => {
+      spinner.fail('tmux 未安裝');
+      console.log(chalk.red('請安裝 tmux:'));
+      console.log('  macOS: brew install tmux');
+      console.log('  Ubuntu: sudo apt install tmux');
+      process.exit(1);
+    });
+
+    tmuxCheck.on('close', (code) => {
+      if (code !== 0) {
+        spinner.fail('tmux 檢查失敗');
+        process.exit(1);
+      }
+
+      spinner.succeed('系統需求檢查完成');
+
+      // 查找 launcher.py 路徑
+      const launcherPath = findLauncherPath();
+      if (!launcherPath) {
+        console.log(chalk.red('❌ 找不到 launcher.py'));
+        console.log(chalk.yellow('請先執行: pdca-shokunin init'));
+        process.exit(1);
+      }
+
+      // 啟動系統
+      console.log();
+      spinner.start('啟動 PDCA-Shokunin 系統...');
+
+      const pdca = spawn('python3', [launcherPath, task], {
+        stdio: 'inherit'
+      });
+
+      pdca.on('error', (err) => {
+        spinner.fail('啟動失敗');
+        console.error(err);
+        process.exit(1);
+      });
+
+      pdca.on('close', (code) => {
+        if (code === 0) {
+          spinner.succeed('系統啟動完成');
+          if (!options.detach) {
+            console.log(chalk.green('\n✨ 使用 tmux attach -t pdca-shokunin 查看狀態'));
+          }
+        } else {
+          spinner.fail('系統啟動失敗');
+          process.exit(code);
+        }
+      });
+    });
+  });
+}
+
+/**
+ * 初始化專案
+ */
+function initProject(options) {
+  const spinner = ora('初始化 PDCA-Shokunin...').start();
+
+  // 執行 setup 腳本
+  const setupPath = path.join(__dirname, '..', 'scripts', 'setup.js');
+  const setup = spawn('node', [setupPath, options.force ? '--force' : ''], {
+    stdio: 'inherit'
+  });
+
+  setup.on('close', (code) => {
+    if (code === 0) {
+      spinner.succeed('初始化完成');
+      console.log(chalk.green('\n✅ PDCA-Shokunin 已準備就緒！'));
+      console.log(chalk.blue('使用方法:'));
+      console.log('  pdca-shokunin "你的任務"');
+      console.log('  或在 Claude CLI 中: /pdca "你的任務"');
+    } else {
+      spinner.fail('初始化失敗');
+      process.exit(code);
+    }
+  });
+}
+
+/**
+ * 檢查運行狀態
+ */
+function checkStatus() {
+  const tmux = spawn('tmux', ['has-session', '-t', 'pdca-shokunin']);
+  
+  tmux.on('close', (code) => {
+    if (code === 0) {
+      console.log(chalk.green('✓ PDCA-Shokunin 正在運行'));
+      
+      // 列出窗口
+      const listWindows = spawn('tmux', ['list-windows', '-t', 'pdca-shokunin'], {
+        stdio: 'pipe'
+      });
+      
+      listWindows.stdout.on('data', (data) => {
+        console.log(chalk.gray('\n窗口列表:'));
+        console.log(data.toString());
+      });
+    } else {
+      console.log(chalk.yellow('⚠ PDCA-Shokunin 未運行'));
+    }
+  });
+}
+
+/**
+ * 停止系統
+ */
+function stopSystem() {
+  const spinner = ora('停止 PDCA-Shokunin...').start();
+  
+  const kill = spawn('tmux', ['kill-session', '-t', 'pdca-shokunin']);
+  
+  kill.on('close', (code) => {
+    if (code === 0) {
+      spinner.succeed('系統已停止');
+    } else {
+      spinner.fail('停止失敗（可能系統未運行）');
+    }
+  });
+}
+
+/**
+ * 查找 launcher.py 路徑
+ */
+function findLauncherPath() {
+  // 優先順序：
+  // 1. 當前目錄的 .pdca-shokunin/launcher.py
+  // 2. npm 全局安裝目錄
+  // 3. npm 本地安裝目錄
+  
+  const paths = [
+    path.join(process.cwd(), '.pdca-shokunin', 'launcher.py'),
+    path.join(__dirname, '..', '.pdca-shokunin', 'launcher.py'),
+    path.join(process.env.HOME, '.pdca-shokunin', 'launcher.py')
+  ];
+  
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  
+  return null;
+}

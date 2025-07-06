@@ -1,0 +1,29 @@
+#!/bin/bash
+# 🎌 PDCA-Shokunin 快速初始化工具
+# 一行指令完成安裝
+
+set -e
+
+# 顏色定義
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}🎌 PDCA-Shokunin 快速初始化${NC}"
+echo "================================"
+
+# 方法一：使用 curl 直接下載並執行
+if command -v curl &> /dev/null; then
+    echo -e "${YELLOW}📥 使用 curl 下載安裝腳本...${NC}"
+    curl -sL https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
+    
+# 方法二：使用 wget
+elif command -v wget &> /dev/null; then
+    echo -e "${YELLOW}📥 使用 wget 下載安裝腳本...${NC}"
+    wget -qO- https://raw.githubusercontent.com/raiyyang/pdca-shokunin/main/install.sh | bash
+    
+else
+    echo -e "${RED}❌ 需要 curl 或 wget${NC}"
+    exit 1
+fi

@@ -1,0 +1,81 @@
+# 開發檔案
+*.log
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+
+# 測試檔案
+test/
+tests/
+*.test.js
+*.spec.js
+
+# 文檔
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Git
+.git/
+.gitignore
+
+# 編輯器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python 相關（但保留核心檔案）
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 舊版本 Python 套件（不需要發布）
+pdca_shokunin/
+setup.py
+pyproject.toml
+MANIFEST.in
+
+# 本地運行時檔案
+.pdca-shokunin/worktrees/
+.pdca-shokunin/communication/
+.pdca-shokunin/logs/
+.pdca-shokunin/current_task.json
+.pdca-shokunin/agents/
+.pdca-shokunin/*.pyc
+
+# 記憶體（使用者自己的資料）
+memories/
+
+# 安裝腳本（npm 有自己的方式）
+install.sh
+pdca-init
+
+# 臨時檔案
+tmp/
+temp/
+*.tmp
+
+# 本地配置
+.env
+.env.local
+config.local.json
