@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * PDCA-Shokunin 斜線指令設置腳本
+ * PDCA 斜線指令設置腳本
  * 自動將 pdca 斜線指令安裝到用戶的全域 Claude 指令目錄
  */
 
@@ -110,7 +110,7 @@ class CommandSetup {
    * 驗證安裝狀態
    */
   verifySetup() {
-    console.log('\n🔍 PDCA-Shokunin 設置檢查:');
+    console.log('\n🔍 PDCA 設置檢查:');
     
     // 檢查專案級
     const projectDir = path.join(process.cwd(), '.claude', 'commands');
@@ -148,7 +148,7 @@ class CommandSetup {
    * 執行完整安裝流程
    */
   install(force = false) {
-    console.log('🎌 PDCA-Shokunin 斜線指令安裝程式');
+    console.log('🎌 PDCA 斜線指令安裝程式');
     console.log('=' .repeat(50));
     console.log(`📍 安裝模式: ${this.isGlobal ? '全域' : '專案級'}`);
     console.log(`📁 目標目錄: ${this.targetCommandsDir}`);
@@ -174,7 +174,7 @@ class CommandSetup {
         console.log('💡 現在您可以在此專案的 Claude Code 中使用:');
       }
       console.log('   /pdca "您的任務描述"');
-      console.log('\n📚 更多使用方式請參考: https://github.com/raiyyang/pdca-shokunin');
+      console.log('\n📚 更多使用方式請參考: https://github.com/raiyyang/pdca');
     }
 
     return success;
@@ -202,7 +202,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       break;
     case 'postinstall':
       // npm postinstall 專用
-      console.log('\n💡 PDCA-Shokunin 安裝完成！');
+      console.log('\n💡 PDCA 安裝完成！');
       console.log('   若要使用斜線指令，請執行:');
       console.log('   pdca setup-commands          # 安裝到當前專案');
       console.log('   pdca setup-commands --global  # 安裝到全域');
