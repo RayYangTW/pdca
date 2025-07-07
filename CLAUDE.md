@@ -128,6 +128,25 @@ pdca_shokunin/          # Python 套件目錄（舊版本遺留，不影響運�
 - 設計模式放在 `memories/patterns/`
 - 所有記憶檔案應使用 Markdown 格式並以中文撰寫
 
+## 🔄 記憶系統規範（強制）
+
+### 記憶檔案結構
+1. **長期記憶**：`memories/long_term/`，檔名格式 `YYYYMMDD_<slug>.md`
+2. **短期記憶**：`memories/short_term/last_session.md`
+
+### 讀取流程（每次對話開始時）
+1. 載入 `last_session.md`
+2. 拼接必要的長期記憶背景
+3. 生成上下文摘要
+
+### 寫入規則
+- **重要業務決策** → 新增至 `memories/long_term/`
+- **流程中的臨時狀態** → 更新 `memories/short_term/last_session.md`
+
+### 同步提醒
+- 完成重要工作後，在回覆結尾加上 `🔄` 提醒記憶檔案待同步
+- 同步順序：`CLAUDE.md` → `docs/` → `memories/`
+
 ## 🔴 Git 提交規範（必須遵守）
 
 ### 重要提醒
