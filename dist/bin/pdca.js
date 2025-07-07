@@ -337,7 +337,7 @@ async function handleVerifySetup() {
 async function handleMonitor(options) {
     const { spawn } = await import('child_process');
     // 檢查 session 是否存在
-    const sessionName = options.session || 'raiy-pdca';
+    const sessionName = options.session || 'pdca';
     const checkSession = spawn('tmux', ['has-session', '-t', sessionName], { stdio: 'pipe' });
     const sessionExists = await new Promise((resolve) => {
         checkSession.on('close', (code) => {

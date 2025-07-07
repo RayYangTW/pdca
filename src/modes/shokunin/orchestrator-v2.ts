@@ -77,7 +77,7 @@ export class PDCAOrchestrator extends EventEmitter {
     
     // 更新 tmux session 名稱
     if (this.runtimeConfig.sessionId) {
-      this.tmuxManager = new TmuxManager(this.runtimeConfig.sessionName || 'raiy-pdca');
+      this.tmuxManager = new TmuxManager(this.runtimeConfig.sessionName || 'pdca');
     }
     
     console.log(`  ✅ 已載入 "${this.runtimeConfig.name}" 風格`);
