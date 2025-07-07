@@ -1,7 +1,7 @@
 {
-  "name": "pdca-shokunin",
+  "name": "raiy-pdca",
   "version": "3.0.0",
-  "description": "🎌 職人級多代理協調系統 - 真正的 5 個 Claude 實例並行協作",
+  "description": "🎯 靈活的多代理協調系統 - 支援多種風格的 5 個 Claude 實例並行協作",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,8 +24,7 @@
     "ai",
     "orchestration",
     "tmux",
-    "shokunin",
-    "職人",
+    "configurable",
     "協調系統",
     "typescript"
   ],
@@ -33,12 +32,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raiyyang/pdca-shokunin.git"
+    "url": "https://github.com/raiyyang/raiy-pdca.git"
   },
   "bugs": {
-    "url": "https://github.com/raiyyang/pdca-shokunin/issues"
+    "url": "https://github.com/raiyyang/raiy-pdca/issues"
   },
-  "homepage": "https://github.com/raiyyang/pdca-shokunin",
+  "homepage": "https://github.com/raiyyang/raiy-pdca",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -54,7 +53,8 @@
     "blessed": "^0.1.81",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
-    "ora": "^7.0.1"
+    "ora": "^7.0.1",
+    "yaml": "^2.3.4"
   },
   "devDependencies": {
     "@types/blessed": "^0.1.25",
@@ -70,7 +70,7 @@
   "files": [
     "dist/",
     "scripts/",
-    ".pdca-shokunin/",
+    ".raiy-pdca/",
     ".claude/",
     "README.md",
     "LICENSE"

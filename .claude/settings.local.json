@@ -9,7 +9,12 @@
       "Bash(mkdir:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(tmux capture-pane:*)",
+      "Bash(npm run postinstall:*)"
     ],
     "deny": []
   }

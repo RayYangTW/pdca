@@ -5,26 +5,34 @@
 
 import { EventEmitter } from 'events';
 import { ClaudeCliManager } from '../../../core/claude-cli.js';
-import type { Agent, AgentStatus, AgentConfig } from '../../../types/index.js';
+import type { Agent, AgentStatus, LegacyAgentConfig } from '../../../types/index.js';
 
 export abstract class BaseAgent extends EventEmitter implements Agent {
-  public readonly name: string;
-  public readonly role: string;
-  public readonly icon: string;
-  public readonly description: string;
+  public name: string;
+  public role: string;
+  public icon: string;
+  public description: string;
   public workspacePath?: string;
   
   protected _status: AgentStatus = 'idle';
   protected tmuxTarget?: string;
-  protected config: AgentConfig;
+  protected config?: LegacyAgentConfig;
 
-  constructor(config: AgentConfig) {
+  constructor(config?: LegacyAgentConfig) {
     super();
-    this.config = config;
-    this.name = config.name;
-    this.role = config.role;
-    this.icon = config.icon;
-    this.description = config.description;
+    if (config) {
+      this.config = config;
+      this.name = config.name;
+      this.role = config.role;
+      this.icon = config.icon;
+      this.description = config.description;
+    } else {
+      // 允許子類別自行設置這些屬性
+      this.name = '';
+      this.role = '';
+      this.icon = '';
+      this.description = '';
+    }
   }
 
   get status(): AgentStatus {
@@ -158,10 +166,42 @@ export abstract class BaseAgent extends EventEmitter implements Agent {
       throw new Error('Tmux target 尚未設置');
     }
 
+    if (!this.config) {
+      throw new Error('代理配置尚未設置');
+    }
+
     await ClaudeCliManager.startInTmux(this.tmuxTarget, this.config, task);
     
     // 等待一下讓 Claude 啟動
     await this.sleep(1000);
+  }
+
+  /**
+   * 使用自定義命令啟動代理
+   * 供 StyledAgent 使用
+   */
+  protected async startWithCommand(command: string): Promise<void> {
+    if (!this.tmuxTarget) {
+      throw new Error('Tmux target 尚未設置');
+    }
+
+    try {
+      this.setStatus('starting');
+      this.emit('starting', { agent: this.name });
+
+      // 在 tmux 中啟動 Claude CLI
+      await ClaudeCliManager.startInTmuxWithCommand(this.tmuxTarget, command);
+      
+      // 等待啟動
+      await this.sleep(1000);
+
+      this.setStatus('running');
+      this.emit('started', { agent: this.name });
+    } catch (error) {
+      this.setStatus('error');
+      this.emit('error', { agent: this.name, error });
+      throw error;
+    }
   }
 
   /**

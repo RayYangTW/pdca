@@ -51,6 +51,28 @@ program
     .action(async () => {
     await handleShokuninCommand('stop', {});
 });
+// 斜線指令管理
+program
+    .command('setup-commands')
+    .description('安裝斜線指令到當前專案或全域')
+    .option('-f, --force', '強制覆蓋現有指令')
+    .option('-g, --global', '安裝到全域 (~/.claude/commands/)')
+    .action(async (options) => {
+    await handleSetupCommands(options.force, options.global);
+});
+program
+    .command('remove-commands')
+    .description('移除斜線指令')
+    .option('-g, --global', '從全域移除')
+    .action(async (options) => {
+    await handleRemoveCommands(options.global);
+});
+program
+    .command('verify-setup')
+    .description('驗證系統和斜線指令安裝狀態')
+    .action(async () => {
+    await handleVerifySetup();
+});
 /**
  * 處理 Shokunin 模式指令
  */
@@ -208,6 +230,101 @@ async function handleStop() {
             spinner.fail('停止失敗（可能系統未運行）');
         }
     });
+}
+/**
+ * 處理斜線指令安裝
+ */
+async function handleSetupCommands(force = false, global = false) {
+    try {
+        const { spawn } = await import('child_process');
+        const { resolve } = await import('path');
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = resolve(__filename, '..');
+        const scriptPath = resolve(__dirname, '../../scripts/setup-commands.js');
+        const args = ['install'];
+        if (force)
+            args.push('--force');
+        if (global)
+            args.push('--global');
+        const child = spawn('node', [scriptPath, ...args], { stdio: 'inherit' });
+        await new Promise((resolve, reject) => {
+            child.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                }
+                else {
+                    reject(new Error(`安裝失敗，退出碼: ${code}`));
+                }
+            });
+            child.on('error', reject);
+        });
+    }
+    catch (error) {
+        console.error(chalk.red(`❌ 安裝失敗: ${error instanceof Error ? error.message : '未知錯誤'}`));
+        process.exit(1);
+    }
+}
+/**
+ * 處理斜線指令移除
+ */
+async function handleRemoveCommands(global = false) {
+    try {
+        const { spawn } = await import('child_process');
+        const { resolve } = await import('path');
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = resolve(__filename, '..');
+        const scriptPath = resolve(__dirname, '../../scripts/setup-commands.js');
+        const args = ['remove'];
+        if (global)
+            args.push('--global');
+        const child = spawn('node', [scriptPath, ...args], { stdio: 'inherit' });
+        await new Promise((resolve, reject) => {
+            child.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                }
+                else {
+                    reject(new Error(`移除失敗，退出碼: ${code}`));
+                }
+            });
+            child.on('error', reject);
+        });
+    }
+    catch (error) {
+        console.error(chalk.red(`❌ 移除失敗: ${error instanceof Error ? error.message : '未知錯誤'}`));
+        process.exit(1);
+    }
+}
+/**
+ * 處理設置驗證
+ */
+async function handleVerifySetup() {
+    try {
+        const { spawn } = await import('child_process');
+        const { resolve } = await import('path');
+        const { fileURLToPath } = await import('url');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = resolve(__filename, '..');
+        const scriptPath = resolve(__dirname, '../../scripts/setup-commands.js');
+        const child = spawn('node', [scriptPath, 'verify'], { stdio: 'inherit' });
+        await new Promise((resolve, reject) => {
+            child.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                }
+                else {
+                    reject(new Error(`驗證失敗，退出碼: ${code}`));
+                }
+            });
+            child.on('error', reject);
+        });
+    }
+    catch (error) {
+        console.error(chalk.red(`❌ 驗證失敗: ${error instanceof Error ? error.message : '未知錯誤'}`));
+        process.exit(1);
+    }
 }
 // 錯誤處理
 process.on('unhandledRejection', (reason, promise) => {

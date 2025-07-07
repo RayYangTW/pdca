@@ -2,15 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🎌 專案概述
+## 🎯 專案概述
 
-**PDCA-Shokunin** 是一個職人級多代理協調系統，使用 5 個獨立的 Claude CLI 實例並行實現 PDCA（Plan-Do-Check-Act）方法論。系統秉承「職人精神」，追求極致簡潔、工匠品質和優雅體驗。
+**Raiy-PDCA** 是一個靈活的多代理協調系統，使用 5 個獨立的 Claude CLI 實例並行實現 PDCA（Plan-Do-Check-Act）方法論。系統支援多種風格配置，預設使用「職人精神」風格，追求極致簡潔、工匠品質和優雅體驗。
 
 ## 🛠️ 常用指令
 
 ### 系統執行（TypeScript 版本）
 ```bash
-# 方式一：使用 -s 參數啟動 Shokunin 模式（推薦）
+# 方式一：使用 -s 參數啟動（預設職人模式，推薦）
 pdca -s "你的任務描述"
 
 # 方式二：透過 Claude CLI 斜線指令
@@ -22,7 +22,7 @@ pdca stop                      # 停止系統
 pdca init                      # 初始化專案
 
 # 監控執行中的代理
-tmux attach -t pdca-shokunin
+tmux attach -t raiy-pdca
 ```
 
 ### 開發工具（可選）
@@ -57,12 +57,12 @@ flake8 .
 ### 核心技術
 - **tmux**: 管理並行代理 sessions
 - **git worktree**: 為每個代理提供隔離工作空間（在 git repo 中時）
-- **檔案系統 IPC**: 代理透過 `.pdca-shokunin/communication/` 通訊
-- **TUI 監控**: 即時狀態監控介面 `.pdca-shokunin/monitor.py`
+- **檔案系統 IPC**: 代理透過 `.raiy-pdca/communication/` 通訊
+- **TUI 監控**: 即時狀態監控介面 `.raiy-pdca/monitor.py`
 
 ### 目錄結構
 ```
-.pdca-shokunin/         # 核心系統（包含啟動器和監控）
+.raiy-pdca/             # 核心系統（包含啟動器和監控）
 ├── launcher.py         # 主要進入點 - 創建 tmux、啟動代理
 ├── monitor.py          # TUI 監控介面 - 實時顯示代理狀態
 ├── agents/             # 代理配置（執行時建立）
@@ -107,19 +107,19 @@ pdca_shokunin/          # Python 套件目錄（舊版本遺留，不影響運�
 1. **系統特性**: 本系統為直接執行架構，無需安裝套件
 2. **依賴需求**: Python 3.8+、tmux、git、Claude CLI
 3. **Claude CLI 權限**: 已配置允許 Python 和檔案操作（.claude/settings.local.json）
-4. **執行方式**: 使用 `/pdca` 斜線指令或直接執行 `.pdca-shokunin/launcher.py`
+4. **執行方式**: 使用 `/pdca` 斜線指令或直接執行 `.raiy-pdca/launcher.py`
 5. **中文優先**: 所有使用者介面內容應優先使用中文
 
 ## 🚀 快速任務
 
 ### 新增功能
 1. 啟動 PDCA 系統：`/pdca "新增功能 X"`
-2. 監控進度：`tmux attach -t pdca-shokunin`
+2. 監控進度：`tmux attach -t raiy-pdca`
 3. 代理會自動協調工作
 
 ### 除錯問題
-1. 檢查代理日誌：`.pdca-shokunin/logs/`
-2. 查看通訊內容：`.pdca-shokunin/communication/`
+1. 檢查代理日誌：`.raiy-pdca/logs/`
+2. 查看通訊內容：`.raiy-pdca/communication/`
 3. 使用監控介面查看即時狀態
 
 ### 知識管理
@@ -127,3 +127,29 @@ pdca_shokunin/          # Python 套件目錄（舊版本遺留，不影響運�
 - 解決方案放在 `memories/solutions/`
 - 設計模式放在 `memories/patterns/`
 - 所有記憶檔案應使用 Markdown 格式並以中文撰寫
+
+## 🔴 Git 提交規範（必須遵守）
+
+### 重要提醒
+**每次完成一段工作後必須進行 git commit**。這是強制性要求，不可省略。
+
+### 提交檢查清單
+在完成任何功能修改後：
+1. 執行 `git status` 查看變更
+2. 執行 `git add .` 加入變更
+3. 使用正確格式提交：`[YYYYMMDD] type: 描述`
+4. 確保無禁用詞彙（AI、Claude、Generated 等）
+5. 提交訊息長度 ≤ 50 字元
+
+### 提交時機
+- ✅ 完成一個功能模組後
+- ✅ 修正一個錯誤後
+- ✅ 更新配置檔案後
+- ✅ 重構程式碼後
+- ❌ 不要累積過多變更才提交
+
+### 範例
+```bash
+git add .
+git commit -m "[20250707] feat: 實作多風格配置系統"
+```

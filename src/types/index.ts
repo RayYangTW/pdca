@@ -1,6 +1,9 @@
 /**
- * PDCA-Shokunin TypeScript 型別定義
+ * Raiy-PDCA TypeScript 型別定義
  */
+
+// 匯出配置相關類型
+export * from './config.js';
 
 // 代理狀態
 export type AgentStatus = 'idle' | 'starting' | 'running' | 'completed' | 'error';
@@ -40,17 +43,17 @@ export interface AgentProgress {
   message?: string;
 }
 
-// 配置介面
+// 舊版配置介面（為了向後相容）
 export interface ShokuninConfig {
   sessionName: string;
   language: 'zh-TW' | 'en';
-  agents: AgentConfig[];
-  communication: CommunicationConfig;
-  monitoring: MonitoringConfig;
+  agents: LegacyAgentConfig[];
+  communication: LegacyCommunicationConfig;
+  monitoring: LegacyMonitoringConfig;
 }
 
-// 代理配置
-export interface AgentConfig {
+// 舊版代理配置
+export interface LegacyAgentConfig {
   name: string;
   role: string;
   icon: string;
@@ -59,15 +62,15 @@ export interface AgentConfig {
   skills: string[];
 }
 
-// 通訊配置
-export interface CommunicationConfig {
+// 舊版通訊配置
+export interface LegacyCommunicationConfig {
   method: 'file-based' | 'socket';
   directory: string;
   syncInterval: number;
 }
 
-// 監控配置
-export interface MonitoringConfig {
+// 舊版監控配置
+export interface LegacyMonitoringConfig {
   refreshRate: number;
   logLevel: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
   showTimestamps: boolean;
@@ -104,19 +107,19 @@ export interface AgentMessage {
 }
 
 // 錯誤類型
-export class ShokuninError extends Error {
+export class PDCAError extends Error {
   constructor(
     message: string,
     public code: string,
     public details?: any
   ) {
     super(message);
-    this.name = 'ShokuninError';
+    this.name = 'PDCAError';
   }
 }
 
 // 事件類型
-export interface ShokuninEvents {
+export interface PDCAEvents {
   'agent:started': { agent: string };
   'agent:completed': { agent: string; result?: any };
   'agent:error': { agent: string; error: Error };

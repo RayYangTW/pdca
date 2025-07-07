@@ -5,6 +5,10 @@
 import { EventEmitter } from 'events';
 import { TmuxManager } from '../../core/tmux-manager.js';
 import { PdcaPlanAgent } from './agents/pdca-plan.js';
+import { PdcaDoAgent } from './agents/pdca-do.js';
+import { PdcaCheckAgent } from './agents/pdca-check.js';
+import { PdcaActAgent } from './agents/pdca-act.js';
+import { KnowledgeAgent } from './agents/knowledge-agent.js';
 export class ShokuninOrchestrator extends EventEmitter {
     config;
     tmuxManager;
@@ -79,11 +83,10 @@ export class ShokuninOrchestrator extends EventEmitter {
         // 創建 PDCA + Knowledge 代理
         const agents = [
             new PdcaPlanAgent(),
-            // TODO: 添加其他代理
-            // new PdcaDoAgent(),
-            // new PdcaCheckAgent(),
-            // new PdcaActAgent(),
-            // new KnowledgeAgent()
+            new PdcaDoAgent(),
+            new PdcaCheckAgent(),
+            new PdcaActAgent(),
+            new KnowledgeAgent()
         ];
         agents.forEach(agent => {
             this.agents.set(agent.name, agent);

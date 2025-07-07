@@ -1,13 +1,13 @@
-# 🎌 PDCA-Shokunin Multi-Agent System
+# 🎯 Raiy-PDCA Multi-Agent System
 
-> **職人級多代理協調系統** - 中文為主，英文為輔的極致 PDCA 體驗
+> **靈活的多代理協調系統** - 支援多種風格配置的極致 PDCA 體驗
 
 ## 🚀 快速開始
 
 ### npm 全局安裝（推薦）
 ```bash
 # 安裝套件
-npm install -g pdca-shokunin
+npm install -g raiy-pdca
 
 # 選擇性設置斜線指令
 pdca setup-commands          # 安裝到當前專案
@@ -72,15 +72,15 @@ pdca remove-commands --global    # 移除全域
 pdca verify-setup
 ```
 
-**設計哲學**：本系統採用「職人精神」設計，全面升級為 TypeScript 版本。用戶可以自由選擇專案級或全域斜線指令，無論哪種方式都能零配置啟動真正的 5 代理並行協作。
+**設計哲學**：本系統採用靈活的多風格設計，預設使用「職人精神」風格，全面使用 TypeScript 。用戶可以自由選擇專案級或全域斜線指令，無論哪種方式都能零配置啟動真正的 5 代理並行協作。
 
 ### 查看狀態
 ```bash
 # 連接到 tmux session
-tmux attach -t pdca-shokunin
+tmux attach -t raiy-pdca
 
 # 查看所有窗口
-tmux list-windows -t pdca-shokunin
+tmux list-windows -t raiy-pdca
 ```
 
 ## 🎭 系統架構
