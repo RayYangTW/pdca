@@ -1,0 +1,77 @@
+{
+  "security_modes": {
+    "safe": {
+      "name": "安全模式",
+      "description": "只讀分析，無修改權限",
+      "risk_level": "low",
+      "allowed_tools": [
+        "Read", "Grep", "Glob", "LS", "Bash(cat:*)", "Bash(echo:*)"
+      ],
+      "denied_tools": [
+        "Write", "Edit", "MultiEdit", "Bash(rm:*)", "Bash(sudo:*)", "WebFetch"
+      ]
+    },
+    "standard": {
+      "name": "標準模式", 
+      "description": "開發權限，限制系統操作",
+      "risk_level": "medium",
+      "allowed_tools": [
+        "Read", "Write", "Edit", "MultiEdit", "Grep", "Glob", "LS",
+        "Bash(npm run:*)", "Bash(git:*)", "Bash(python:*)", "Bash(node:*)",
+        "Bash(cat:*)", "Bash(echo:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(mv:*)"
+      ],
+      "denied_tools": [
+        "Bash(rm -rf:*)", "Bash(sudo:*)", "Bash(chmod:*)", 
+        "Bash(npm install:*)", "Bash(pip install:*)", "Bash(curl:*)", 
+        "Bash(wget:*)", "WebFetch"
+      ]
+    },
+    "expert": {
+      "name": "專家模式",
+      "description": "完全權限（高風險）",
+      "risk_level": "high", 
+      "allowed_tools": ["*"],
+      "denied_tools": [],
+      "requires_confirmation": true,
+      "audit_enabled": true
+    },
+    "custom": {
+      "name": "自定義模式",
+      "description": "手動配置權限",
+      "risk_level": "variable",
+      "config_required": true
+    }
+  },
+  "agents": {
+    "plan": {
+      "name": "規劃師",
+      "description": "需求分析、策略制定、任務協調",
+      "role": "analysis"
+    },
+    "do": {
+      "name": "執行者", 
+      "description": "架構設計、功能實作、代碼開發",
+      "role": "implementation"
+    },
+    "check": {
+      "name": "檢查員",
+      "description": "品質驗證、測試檢查、結果評估", 
+      "role": "validation"
+    },
+    "act": {
+      "name": "改善者",
+      "description": "性能優化、問題改善、持續改進",
+      "role": "optimization"
+    },
+    "knowledge": {
+      "name": "知識管理",
+      "description": "智能監聽、分類歸檔、經驗累積",
+      "role": "documentation"
+    }
+  },
+  "risk_keywords": {
+    "high": ["刪除", "移除", "格式化", "重設", "sudo", "admin", "root", "安裝"],
+    "medium": ["修改", "更新", "部署", "發布", "建置", "測試"],
+    "low": ["分析", "查看", "讀取", "檢查", "報告", "文檔"]
+  }
+}
