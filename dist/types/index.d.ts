@@ -17,6 +17,8 @@ export interface Agent {
     setTmuxTarget(target: string): void;
     setWorkspacePath(path: string): void;
     isRunning(): Promise<boolean>;
+    on(event: string, listener: (...args: any[]) => void): this;
+    emit(event: string, ...args: any[]): boolean;
 }
 export interface Task {
     id: string;

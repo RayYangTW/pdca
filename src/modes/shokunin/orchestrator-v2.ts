@@ -202,8 +202,54 @@ export class PDCAOrchestrator extends EventEmitter {
    * 啟動監控
    */
   private async startMonitoring(): Promise<void> {
-    // TODO: 實現 blessed 監控介面
     console.log('📊 啟動監控介面...');
+    
+    // 動態導入監控模組（避免在非監控模式下載入 blessed）
+    const { startMonitor } = await import('../../core/monitor.js');
+    
+    const monitor = startMonitor({
+      sessionName: this.tmuxManager.getSessionName(),
+      workingDir: process.cwd(),
+      updateInterval: 2000 // 每2秒更新一次
+    });
+    
+    // 設置代理和任務
+    monitor.setAgents(Array.from(this.agents.values()));
+    if (this.currentTask) {
+      monitor.setTask(this.currentTask);
+    }
+    
+    // 監聽代理事件並更新監控
+    this.agents.forEach((agent, name) => {
+      agent.on('starting', () => {
+        monitor.updateAgent(name, { status: 'starting' });
+        monitor.log('info', `${agent.role} 開始啟動`);
+      });
+      
+      agent.on('started', () => {
+        monitor.updateAgent(name, { status: 'running' });
+        monitor.log('info', `${agent.role} 啟動完成`);
+      });
+      
+      agent.on('error', (error: any) => {
+        monitor.updateAgent(name, { status: 'error', message: error.message });
+        monitor.log('error', `${agent.role} 發生錯誤: ${error.message}`);
+      });
+      
+      agent.on('completed', () => {
+        monitor.updateAgent(name, { status: 'completed' });
+        monitor.log('info', `${agent.role} 完成任務`);
+      });
+    });
+    
+    // 監聽系統事件
+    this.on('system-error', ({ error }) => {
+      monitor.log('error', `系統錯誤: ${error.message}`);
+    });
+    
+    monitor.on('stop', () => {
+      console.log('監控介面已關閉');
+    });
   }
 
   /**

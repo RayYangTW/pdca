@@ -24,6 +24,10 @@ export interface Agent {
   setTmuxTarget(target: string): void;
   setWorkspacePath(path: string): void;
   isRunning(): Promise<boolean>;
+  
+  // EventEmitter 方法
+  on(event: string, listener: (...args: any[]) => void): this;
+  emit(event: string, ...args: any[]): boolean;
 }
 
 // 任務介面

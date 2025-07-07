@@ -90,6 +90,14 @@ program
   });
 
 program
+  .command('monitor')
+  .description('啟動監控介面查看運行中的系統')
+  .option('-s, --session <name>', 'tmux session 名稱', 'raiy-pdca')
+  .action(async (options) => {
+    await handleMonitor(options);
+  });
+
+program
   .command('list-styles')
   .description('列出所有可用的風格配置')
   .action(async () => {
@@ -358,6 +366,63 @@ async function handleVerifySetup(): Promise<void> {
     
   } catch (error) {
     console.error(chalk.red(`❌ 驗證失敗: ${error instanceof Error ? error.message : '未知錯誤'}`));
+    process.exit(1);
+  }
+}
+
+/**
+ * 處理監控命令
+ */
+async function handleMonitor(options: { session?: string }): Promise<void> {
+  const { spawn } = await import('child_process');
+  
+  // 檢查 session 是否存在
+  const sessionName = options.session || 'raiy-pdca';
+  const checkSession = spawn('tmux', ['has-session', '-t', sessionName], { stdio: 'pipe' });
+  
+  const sessionExists = await new Promise<boolean>((resolve) => {
+    checkSession.on('close', (code) => {
+      resolve(code === 0);
+    });
+  });
+  
+  if (!sessionExists) {
+    console.error(chalk.red(`❌ Session "${sessionName}" 不存在`));
+    console.log(chalk.yellow('請先啟動 Raiy-PDCA 系統：'));
+    console.log(chalk.blue('  pdca -s "你的任務"'));
+    process.exit(1);
+  }
+  
+  console.log(chalk.blue(`📊 正在啟動監控介面...`));
+  console.log(chalk.gray('提示：按 q 退出監控'));
+  
+  try {
+    // 動態導入監控模組
+    const { startMonitor } = await import('../core/monitor.js');
+    
+    const monitor = startMonitor({
+      sessionName,
+      workingDir: process.cwd(),
+      updateInterval: 1000 // 每秒更新
+    });
+    
+    // 從檔案系統載入代理資訊
+    // TODO: 實現從通訊目錄讀取代理狀態
+    
+    monitor.log('info', `已連接到 session: ${sessionName}`);
+    monitor.log('info', '監控系統啟動完成');
+    
+    // 保持進程運行
+    process.on('SIGINT', () => {
+      monitor.stop();
+      process.exit(0);
+    });
+    
+  } catch (error) {
+    console.error(chalk.red('❌ 無法啟動監控介面'));
+    if (error instanceof Error) {
+      console.error(chalk.gray(error.message));
+    }
     process.exit(1);
   }
 }
