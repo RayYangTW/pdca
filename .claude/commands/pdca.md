@@ -5,7 +5,7 @@
 ## 🎌 系統啟動
 
 ```bash
-pdca -s "$ARGUMENTS"
+pdca "$ARGUMENTS"
 ```
 
 這將創建真正的多代理非同步協作環境：

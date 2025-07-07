@@ -12,26 +12,49 @@ const program = new Command();
 program
     .name('pdca')
     .description('🎯 PDCA 靈活的多代理協調系統')
-    .version('3.0.0');
-// 主要指令：pdca -s "mission"
+    .version('3.0.0')
+    .usage('[任務描述] [選項]')
+    .addHelpText('after', `
+範例：
+  $ pdca "建立用戶登入系統"
+  $ pdca "優化資料庫查詢" -p enterprise
+  $ pdca "快速原型開發" -p startup -v
+
+子命令：
+  $ pdca init      初始化專案配置
+  $ pdca status    查看系統狀態
+  $ pdca stop      停止運行中的系統
+`);
+// 主要指令：pdca "mission"
 program
-    .option('-s, --shokunin <mission>', '啟動任務處理（預設職人模式）')
+    .argument('[mission]', '任務描述')
+    .option('-s, --shokunin <mission>', '（已棄用）使用位置參數代替')
     .option('-p, --profile <name>', '指定風格配置（shokunin/agile/enterprise等）')
     .option('-c, --config <path>', '使用自定義配置檔案')
-    .option('-d, --detach', '背景執行，不阻塞終端')
+    .option('-d, --detach', '背景執行，不阻塞紂端')
     .option('-m, --monitor', '啟動後直接進入監控模式')
     .option('-a, --agents <number>', '自定義代理數量（預設 5）', '5')
     .option('--mode <type>', '工作模式', 'pdca')
     .option('-v, --verbose', '顯示詳細日誌')
-    .action(async (options) => {
-    if (!options.shokunin) {
-        console.log(chalk.yellow('請使用 -s 參數指定任務，例如：'));
-        console.log(chalk.blue('  pdca -s "建立用戶登入系統"'));
-        console.log(chalk.blue('  pdca -s init'));
-        console.log(chalk.blue('  pdca -s status'));
+    .action(async (mission, options) => {
+    // 優先使用位置參數，其次是 -s 參數（向後相容）
+    const taskMission = mission || options.shokunin;
+    // 如果使用 -s 參數，顯示棄用警告
+    if (!mission && options.shokunin) {
+        console.log(chalk.yellow('⚠️  警告：-s 參數已棄用，請直接使用：pdca "任務描述"'));
+    }
+    if (!taskMission) {
+        console.log(chalk.yellow('請指定任務，例如：'));
+        console.log(chalk.blue('  pdca "建立用戶登入系統"'));
+        console.log(chalk.blue('  pdca "優化資料庫查詢" -p enterprise'));
+        console.log('');
+        console.log(chalk.gray('其他指令：'));
+        console.log(chalk.gray('  pdca init      - 初始化專案'));
+        console.log(chalk.gray('  pdca status    - 查看狀態'));
+        console.log(chalk.gray('  pdca stop      - 停止系統'));
         return;
     }
-    await handleShokuninCommand(options.shokunin, options);
+    await handleShokuninCommand(taskMission, options);
 });
 // 快捷指令
 program

@@ -17,16 +17,16 @@ pdca setup-commands --global # 安裝到全域（任何專案可用）
 pdca verify-setup
 
 # 啟動系統
-pdca -s "建立用戶登入系統"
+pdca "建立用戶登入系統"
 ```
 
 ### 🎯 三種使用方式
 
 #### 1. CLI 指令模式（推薦）
 ```bash
-pdca -s "建立用戶登入系統"
-pdca -s "優化資料庫性能"
-pdca -s "設計微服務架構"
+pdca "建立用戶登入系統"
+pdca "優化資料庫性能" -p enterprise
+pdca "設計微服務架構" -v
 ```
 
 #### 2. Claude Code 斜線指令模式 🆕
@@ -138,23 +138,23 @@ pdca/
 
 ### 軟體開發
 ```bash
-/pdca "建立 RESTful API"
-/pdca "優化資料庫性能"
-/pdca "設計微服務架構"
+pdca "建立 RESTful API"
+pdca "優化資料庫性能" -p enterprise
+pdca "設計微服務架榶" -p agile
 ```
 
 ### 系統分析
 ```bash
-/pdca "分析系統瓶頸"
-/pdca "設計擴展方案"
-/pdca "建立監控體系"
+pdca "分析系統瓶頸" -v
+pdca "設計擴展方案" -p startup
+pdca "建立監控體系" -m
 ```
 
 ### 學習研究
 ```bash
-/pdca "學習 Kubernetes 部署"
-/pdca "研究最新前端框架"
-/pdca "分析競品技術方案"
+pdca "學習 Kubernetes 部署" -p research
+pdca "研究最新前端框架"
+pdca "分析競品技術方案" -a 7
 ```
 
 ## 🔧 環境需求
@@ -172,9 +172,11 @@ git clone <repository-url>
 cd pdca
 
 # 2. 直接使用（零配置）
+# 在 Claude Code 中使用斜線指令
 /pdca "測試任務"
-# 或
-python3 .pdca-shokunin/launcher.py "測試任務"
+
+# 或使用已安裝的 CLI
+pdca "測試任務"
 ```
 
 **注意**：`pdca_shokunin/` 目錄是舊版本套件，保留僅為相容性考慮。實際系統運行完全依賴 `.pdca-shokunin/` 目錄中的啟動器。
