@@ -1,4 +1,4 @@
-# 🎯 Raiy-PDCA Multi-Agent System
+# 🎯 PDCA Multi-Agent System
 
 > **靈活的多代理協調系統** - 支援多種風格配置的極致 PDCA 體驗
 
@@ -7,7 +7,7 @@
 ### npm 全局安裝（推薦）
 ```bash
 # 安裝套件
-npm install -g raiy-pdca
+npm install -g pdca
 
 # 選擇性設置斜線指令
 pdca setup-commands          # 安裝到當前專案
@@ -111,7 +111,7 @@ tmux list-windows -t raiy-pdca
 ## 📁 專案結構
 
 ```
-raiy-pdca-shokunin/
+pdca/
 ├── .claude/                    # Claude 配置
 │   ├── commands/               # 斜線指令
 │   │   └── pdca.md            # /pdca 指令定義
@@ -169,7 +169,7 @@ raiy-pdca-shokunin/
 ```bash
 # 1. 克隆專案
 git clone <repository-url>
-cd raiy-pdca-shokunin
+cd pdca
 
 # 2. 直接使用（零配置）
 /pdca "測試任務"

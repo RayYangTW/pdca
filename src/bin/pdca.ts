@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Raiy-PDCA CLI 入口
+ * PDCA CLI 入口
  * 支援 pdca -s "mission" 指令格式
  */
 
@@ -16,7 +16,7 @@ const program = new Command();
 // 版本和基本資訊
 program
   .name('pdca')
-  .description('🎯 Raiy-PDCA 靈活的多代理協調系統')
+  .description('🎯 PDCA 靈活的多代理協調系統')
   .version('3.0.0');
 
 // 主要指令：pdca -s "mission"
@@ -44,7 +44,7 @@ program
 // 快捷指令
 program
   .command('init')
-  .description('初始化當前專案的 Raiy-PDCA 配置')
+  .description('初始化當前專案的 PDCA 配置')
   .option('-f, --force', '強制覆蓋現有配置')
   .action(async (options) => {
     await handleShokuninCommand('init', options);

@@ -1,5 +1,5 @@
 {
-  "name": "raiy-pdca",
+  "name": "pdca",
   "version": "3.0.0",
   "description": "🎯 靈活的多代理協調系統 - 支援多種風格的 5 個 Claude 實例並行協作",
   "type": "module",
@@ -28,16 +28,20 @@
     "協調系統",
     "typescript"
   ],
-  "author": "Raiy Yang <raiy@example.com>",
+  "author": {
+    "name": "Raiy Yang",
+    "email": "raiy@example.com",
+    "url": "https://github.com/raiyyang"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raiyyang/raiy-pdca.git"
+    "url": "https://github.com/raiyyang/pdca.git"
   },
   "bugs": {
-    "url": "https://github.com/raiyyang/raiy-pdca/issues"
+    "url": "https://github.com/raiyyang/pdca/issues"
   },
-  "homepage": "https://github.com/raiyyang/raiy-pdca",
+  "homepage": "https://github.com/raiyyang/pdca",
   "engines": {
     "node": ">=18.0.0"
   },

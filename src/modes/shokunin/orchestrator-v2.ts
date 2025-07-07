@@ -1,5 +1,5 @@
 /**
- * Raiy-PDCA 協調器 v2
+ * PDCA 協調器 v2
  * 支援多風格配置的版本
  */
 
@@ -19,15 +19,15 @@ export class PDCAOrchestrator extends EventEmitter {
   constructor() {
     super();
     this.styleEngine = new StyleEngine();
-    this.tmuxManager = new TmuxManager('raiy-pdca');
+    this.tmuxManager = new TmuxManager('pdca');
   }
 
   /**
-   * 啟動 Raiy-PDCA 系統
+   * 啟動 PDCA 系統
    */
   async start(mission: string, options: CLIOptions & ConfigLoadOptions = {}): Promise<void> {
     try {
-      console.log('🎯 正在啟動 Raiy-PDCA 系統...');
+      console.log('🎯 正在啟動 PDCA 系統...');
       
       // 1. 載入風格配置
       await this.loadConfiguration(options);

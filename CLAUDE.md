@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🎯 專案概述
 
-**Raiy-PDCA** 是一個靈活的多代理協調系統，使用 5 個獨立的 Claude CLI 實例並行實現 PDCA（Plan-Do-Check-Act）方法論。系統支援多種風格配置，預設使用「職人精神」風格，追求極致簡潔、工匠品質和優雅體驗。
+**PDCA** 是一個靈活的多代理協調系統，使用 5 個獨立的 Claude CLI 實例並行實現 PDCA（Plan-Do-Check-Act）方法論。系統支援多種風格配置，預設使用「職人精神」風格，追求極致簡潔、工匠品質和優雅體驗。
 
 ## 🛠️ 常用指令
 

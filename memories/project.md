@@ -1,6 +1,6 @@
 # 🎌 PDCA-Shokunin Project Context
 
-**專案名稱**: raiy-pdca-shokunin  
+**專案名稱**: pdca-shokunin  
 **版本**: 3.0 (職人版)  
 **最後更新**: 2025-07-06  
 **狀態**: 系統建構完成，待測試
@@ -117,8 +117,8 @@ Ctrl+B 6  # monitor
 
 ## 📝 重要提醒
 
-- 專案位置：`/Users/rayyang/Raiy_Workspace/00_Raiy/dev/raiy-pdca-shokunin/`
-- 不是在 `/raiy-pdca/` 目錄（那是另一個專案）
+- 專案位置：`/Users/rayyang/Raiy_Workspace/00_Raiy/dev/pdca-shokunin/`
+- 不是在 `/pdca/` 目錄（那是另一個專案）
 - 系統已清理，只保留核心檔案
 - tmux session 名稱：`pdca-shokunin`
 - 斜線指令：`/pdca`
