@@ -52,14 +52,14 @@ program
 
 program
   .command('status')
-  .description('查看 Raiy-PDCA 運行狀態')
+  .description('查看 PDCA 運行狀態')
   .action(async () => {
     await handleShokuninCommand('status', {});
   });
 
 program
   .command('stop')
-  .description('停止 Raiy-PDCA 系統')
+  .description('停止 PDCA 系統')
   .action(async () => {
     await handleShokuninCommand('stop', {});
   });
@@ -128,7 +128,7 @@ async function handleShokuninCommand(mission: string, options: CLIOptions): Prom
     }
 
     // 正常任務處理
-    console.log(chalk.blue.bold('🎯 Raiy-PDCA Multi-Agent System'));
+    console.log(chalk.blue.bold('🎯 PDCA Multi-Agent System'));
     console.log(chalk.gray('═'.repeat(50)));
     console.log(chalk.yellow(`📋 任務: ${mission}`));
     console.log();
@@ -143,7 +143,7 @@ async function handleShokuninCommand(mission: string, options: CLIOptions): Prom
     const orchestrator = new PDCAOrchestrator();
 
     // 啟動系統
-    spinner.start('啟動 Raiy-PDCA 系統...');
+    spinner.start('啟動 PDCA 系統...');
     await orchestrator.start(mission, {
       ...options,
       profile: options.profile,
@@ -153,7 +153,7 @@ async function handleShokuninCommand(mission: string, options: CLIOptions): Prom
     if (!options.detach) {
       spinner.succeed('系統啟動完成');
       console.log();
-      console.log(chalk.green('✨ Raiy-PDCA 系統運行中...'));
+      console.log(chalk.green('✨ PDCA 系統運行中...'));
       console.log(chalk.blue('📊 查看狀態: tmux attach -t raiy-pdca'));
       console.log(chalk.gray('💡 按 Ctrl+B 然後按數字鍵切換代理窗口'));
       console.log(chalk.gray('💡 按 Ctrl+B 然後按 d 分離 session'));
@@ -224,7 +224,7 @@ async function checkSystemRequirements(): Promise<void> {
  * 處理初始化
  */
 async function handleInit(options: CLIOptions): Promise<void> {
-  console.log(chalk.blue('🎯 初始化 Raiy-PDCA...'));
+  console.log(chalk.blue('🎯 初始化 PDCA...'));
   // TODO: 實現初始化邏輯
   console.log(chalk.green('✅ 初始化完成'));
 }
@@ -239,12 +239,12 @@ async function handleStatus(): Promise<void> {
   
   tmux.on('close', (code) => {
     if (code === 0) {
-      console.log(chalk.green('✓ Raiy-PDCA 正在運行'));
+      console.log(chalk.green('✓ PDCA 正在運行'));
       
       // 列出窗口
       const listWindows = spawn('tmux', ['list-windows', '-t', 'raiy-pdca'], { stdio: 'inherit' });
     } else {
-      console.log(chalk.yellow('⚠ Raiy-PDCA 未運行'));
+      console.log(chalk.yellow('⚠ PDCA 未運行'));
     }
   });
 }
@@ -254,7 +254,7 @@ async function handleStatus(): Promise<void> {
  */
 async function handleStop(): Promise<void> {
   const { spawn } = await import('child_process');
-  const spinner = ora('停止 Raiy-PDCA...').start();
+  const spinner = ora('停止 PDCA...').start();
   
   const kill = spawn('tmux', ['kill-session', '-t', 'raiy-pdca'], { stdio: 'pipe' });
   
@@ -388,7 +388,7 @@ async function handleMonitor(options: { session?: string }): Promise<void> {
   
   if (!sessionExists) {
     console.error(chalk.red(`❌ Session "${sessionName}" 不存在`));
-    console.log(chalk.yellow('請先啟動 Raiy-PDCA 系統：'));
+    console.log(chalk.yellow('請先啟動 PDCA 系統：'));
     console.log(chalk.blue('  pdca -s "你的任務"'));
     process.exit(1);
   }

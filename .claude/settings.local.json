@@ -15,7 +15,8 @@
       "Bash(node:*)",
       "Bash(tmux capture-pane:*)",
       "Bash(npm run postinstall:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(tmux list-sessions:*)"
     ],
     "deny": []
   }
