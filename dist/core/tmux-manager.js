@@ -9,6 +9,12 @@ export class TmuxManager {
         this.sessionName = sessionName;
     }
     /**
+     * 獲取 session 名稱
+     */
+    getSessionName() {
+        return this.sessionName;
+    }
+    /**
      * 檢查 tmux session 是否存在
      */
     async hasSession() {

@@ -3,17 +3,17 @@
  * 所有 PDCA 代理的基類
  */
 import { EventEmitter } from 'events';
-import type { Agent, AgentStatus, AgentConfig } from '../../../types/index.js';
+import type { Agent, AgentStatus, LegacyAgentConfig } from '../../../types/index.js';
 export declare abstract class BaseAgent extends EventEmitter implements Agent {
-    readonly name: string;
-    readonly role: string;
-    readonly icon: string;
-    readonly description: string;
+    name: string;
+    role: string;
+    icon: string;
+    description: string;
     workspacePath?: string;
     protected _status: AgentStatus;
     protected tmuxTarget?: string;
-    protected config: AgentConfig;
-    constructor(config: AgentConfig);
+    protected config?: LegacyAgentConfig;
+    constructor(config?: LegacyAgentConfig);
     get status(): AgentStatus;
     /**
      * 啟動代理
@@ -63,6 +63,11 @@ export declare abstract class BaseAgent extends EventEmitter implements Agent {
      * 在 tmux 中啟動 Claude CLI
      */
     protected startClaudeInTmux(task: string): Promise<void>;
+    /**
+     * 使用自定義命令啟動代理
+     * 供 StyledAgent 使用
+     */
+    protected startWithCommand(command: string): Promise<void>;
     /**
      * 休眠工具函數
      */

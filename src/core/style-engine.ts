@@ -20,12 +20,12 @@ import type { Agent } from '../types/index.js';
  * 包裝基礎代理，注入風格特定的行為
  */
 class StyledAgent extends BaseAgent {
-  private config: AgentInstanceConfig;
+  private agentConfig: AgentInstanceConfig;
   private basePrompt: string;
 
   constructor(config: AgentInstanceConfig) {
     super();
-    this.config = config;
+    this.agentConfig = config;
     this.name = config.name;
     this.role = config.role;
     this.icon = config.icon;
@@ -36,27 +36,40 @@ class StyledAgent extends BaseAgent {
   }
 
   /**
-   * 啟動代理
+   * 實現抽象方法：啟動邏輯
    */
-  async start(mission: string): Promise<void> {
+  protected async onStart(task: string): Promise<void> {
+    const prompt = this.getInitialPrompt(task);
+    await this.startWithCommand(prompt);
+  }
+
+  /**
+   * 實現抽象方法：停止邏輯
+   */
+  protected async onStop(): Promise<void> {
+    // 基本停止邏輯，可根據需要擴展
+    console.log(`停止代理 ${this.name}`);
+  }
+
+  /**
+   * 實現抽象方法：獲取初始提示詞
+   */
+  protected getInitialPrompt(task: string): string {
     // 使用配置中的提示詞模板
-    const prompt = this.formatPrompt(this.config.prompts.mission, { mission });
+    const prompt = this.formatPrompt(this.agentConfig.prompts.mission, { mission: task });
     
     // 設置思考深度
     const thinkingCommand = this.getThinkingCommand();
     
     // 構建完整指令
-    const fullCommand = `${this.basePrompt}\n\n${thinkingCommand}\n\n${prompt}`;
-    
-    // 調用父類的啟動方法
-    await super.startWithCommand(fullCommand);
+    return `${this.basePrompt}\n\n${thinkingCommand}\n\n${prompt}`;
   }
 
   /**
    * 構建基礎提示詞
    */
   private buildBasePrompt(): string {
-    const { personality, prompts } = this.config;
+    const { personality, prompts } = this.agentConfig;
     
     let basePrompt = prompts.initial || '';
     
@@ -99,7 +112,7 @@ class StyledAgent extends BaseAgent {
       'ultrathink': '/ultrathink',
     };
     
-    return thinkingMap[this.config.personality.thinking] || '/think';
+    return thinkingMap[this.agentConfig.personality.thinking] || '/think';
   }
 }
 

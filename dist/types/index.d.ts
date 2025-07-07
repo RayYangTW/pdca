@@ -1,6 +1,7 @@
 /**
- * PDCA-Shokunin TypeScript 型別定義
+ * Raiy-PDCA TypeScript 型別定義
  */
+export * from './config.js';
 export type AgentStatus = 'idle' | 'starting' | 'running' | 'completed' | 'error';
 export interface Agent {
     name: string;
@@ -33,11 +34,11 @@ export interface AgentProgress {
 export interface ShokuninConfig {
     sessionName: string;
     language: 'zh-TW' | 'en';
-    agents: AgentConfig[];
-    communication: CommunicationConfig;
-    monitoring: MonitoringConfig;
+    agents: LegacyAgentConfig[];
+    communication: LegacyCommunicationConfig;
+    monitoring: LegacyMonitoringConfig;
 }
-export interface AgentConfig {
+export interface LegacyAgentConfig {
     name: string;
     role: string;
     icon: string;
@@ -45,12 +46,12 @@ export interface AgentConfig {
     prompt: string;
     skills: string[];
 }
-export interface CommunicationConfig {
+export interface LegacyCommunicationConfig {
     method: 'file-based' | 'socket';
     directory: string;
     syncInterval: number;
 }
-export interface MonitoringConfig {
+export interface LegacyMonitoringConfig {
     refreshRate: number;
     logLevel: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
     showTimestamps: boolean;
@@ -61,6 +62,8 @@ export interface CLIOptions {
     agents?: number;
     mode?: 'pdca' | 'sparc';
     verbose?: boolean;
+    profile?: string;
+    config?: string;
 }
 export interface TmuxSession {
     name: string;
@@ -78,12 +81,12 @@ export interface AgentMessage {
     timestamp: Date;
     type: 'task' | 'status' | 'result' | 'communication';
 }
-export declare class ShokuninError extends Error {
+export declare class PDCAError extends Error {
     code: string;
     details?: any | undefined;
     constructor(message: string, code: string, details?: any | undefined);
 }
-export interface ShokuninEvents {
+export interface PDCAEvents {
     'agent:started': {
         agent: string;
     };

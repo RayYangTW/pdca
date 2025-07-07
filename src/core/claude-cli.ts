@@ -51,7 +51,7 @@ export class ClaudeCliManager {
         break;
         
       default:
-        prompt = agent.prompt || `你是 ${agent.role}。任務：${task}`;
+        prompt = agent.prompts?.mission?.replace('{{mission}}', task) || `你是 ${agent.role}。任務：${task}`;
     }
 
     // 返回完整命令字符串
@@ -74,6 +74,7 @@ export class ClaudeCliManager {
       command, 'Enter'
     ], 'tmux');
   }
+
 
   /**
    * 檢查 Claude CLI 進程是否還在運行

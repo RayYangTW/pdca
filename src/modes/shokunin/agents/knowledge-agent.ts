@@ -56,7 +56,8 @@ export class KnowledgeAgent extends BaseAgent {
   }
 
   protected getInitialPrompt(task: string): string {
-    return `${this.config.prompt}
+    const basePrompt = this.config?.prompt || '你是知識管理代理，負責記錄和總結經驗。';
+    return `${basePrompt}
 
 當前任務: ${task}
 

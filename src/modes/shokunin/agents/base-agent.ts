@@ -170,10 +170,9 @@ export abstract class BaseAgent extends EventEmitter implements Agent {
       throw new Error('代理配置尚未設置');
     }
 
-    await ClaudeCliManager.startInTmux(this.tmuxTarget, this.config, task);
-    
-    // 等待一下讓 Claude 啟動
-    await this.sleep(1000);
+    // 使用 getInitialPrompt 獲取提示詞，然後調用 startWithCommand
+    const prompt = this.getInitialPrompt(task);
+    await this.startWithCommand(prompt);
   }
 
   /**

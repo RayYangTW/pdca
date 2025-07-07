@@ -40,7 +40,7 @@ export class ClaudeCliManager {
                 prompt = `你是知識管理代理。請監聽其他代理的工作，智能記錄重要決策和經驗。使用中文記錄。`;
                 break;
             default:
-                prompt = agent.prompt || `你是 ${agent.role}。任務：${task}`;
+                prompt = agent.prompts?.mission?.replace('{{mission}}', task) || `你是 ${agent.role}。任務：${task}`;
         }
         // 返回完整命令字符串
         return `${baseCmd} -p "${prompt}"`;
@@ -102,6 +102,32 @@ export class ClaudeCliManager {
         }
         catch (error) {
             console.warn(`停止 Claude CLI 時發生錯誤: ${error}`);
+        }
+    }
+    /**
+     * 在 tmux 中使用自定義命令啟動 Claude CLI
+     * 供風格化代理使用
+     */
+    static async startInTmuxWithCommand(tmuxTarget, command) {
+        try {
+            // 確保窗口存在
+            const checkResult = await ClaudeCliManager.execCommand([
+                'has-session', '-t', tmuxTarget.split(':')[0]
+            ], 'tmux');
+            if (checkResult.code !== 0) {
+                throw new Error(`Tmux session ${tmuxTarget} 不存在`);
+            }
+            // 啟動 Claude CLI
+            await ClaudeCliManager.execCommand([
+                'send-keys', '-t', tmuxTarget, 'claude', 'Enter'
+            ], 'tmux');
+            // 等待 Claude CLI 啟動
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            // 發送初始命令
+            await ClaudeCliManager.sendMessageToTmux(tmuxTarget, command);
+        }
+        catch (error) {
+            throw new Error(`在 tmux 中啟動 Claude CLI 失敗: ${error}`);
         }
     }
     /**

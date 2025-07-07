@@ -15,6 +15,13 @@ export class TmuxManager {
   }
 
   /**
+   * 獲取 session 名稱
+   */
+  getSessionName(): string {
+    return this.sessionName;
+  }
+
+  /**
    * 檢查 tmux session 是否存在
    */
   async hasSession(): Promise<boolean> {

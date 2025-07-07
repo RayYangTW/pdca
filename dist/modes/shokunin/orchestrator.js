@@ -1,5 +1,5 @@
 /**
- * Shokunin 模式協調器
+ * Raiy-PDCA 協調器
  * 管理 5 個代理的並行執行
  */
 import { EventEmitter } from 'events';
@@ -21,11 +21,11 @@ export class ShokuninOrchestrator extends EventEmitter {
         this.initializeAgents();
     }
     /**
-     * 啟動 Shokunin 系統
+     * 啟動 Raiy-PDCA 系統
      */
     async start(mission, options = {}) {
         try {
-            console.log('🎌 正在啟動 PDCA-Shokunin 系統...');
+            console.log('🎯 正在啟動 Raiy-PDCA 系統...');
             // 1. 創建任務
             this.currentTask = this.createTask(mission);
             // 2. 準備 tmux 環境
@@ -50,7 +50,7 @@ export class ShokuninOrchestrator extends EventEmitter {
      * 停止系統
      */
     async stop() {
-        console.log('🛑 正在停止 PDCA-Shokunin 系統...');
+        console.log('🛑 正在停止 Raiy-PDCA 系統...');
         try {
             // 停止所有代理
             await this.stopAllAgents();

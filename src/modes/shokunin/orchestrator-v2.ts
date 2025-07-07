@@ -32,16 +32,21 @@ export class PDCAOrchestrator extends EventEmitter {
       // 1. 載入風格配置
       await this.loadConfiguration(options);
       
-      // 2. 創建任務
+      // 2. 使用風格引擎創建代理
+      console.log('🎭 創建代理實例...');
+      this.agents = this.styleEngine.createAgents();
+      console.log(`  ✅ 已創建 ${this.agents.size} 個代理`);
+      
+      // 3. 創建任務
       this.currentTask = this.createTask(mission);
       
-      // 3. 準備 tmux 環境
+      // 4. 準備 tmux 環境
       await this.setupTmuxEnvironment();
       
-      // 4. 創建並啟動代理
-      await this.createAndStartAgents(mission);
+      // 5. 啟動代理
+      await this.startAgents(mission);
       
-      // 5. 設置監控（如果需要）
+      // 6. 設置監控（如果需要）
       if (options.monitor) {
         await this.startMonitoring();
       }
@@ -53,7 +58,7 @@ export class PDCAOrchestrator extends EventEmitter {
       });
       
       console.log(`\n✨ ${this.runtimeConfig?.name} 風格已啟動`);
-      console.log(`📊 查看狀態: tmux attach -t ${this.tmuxManager.sessionName}`);
+      console.log(`📊 查看狀態: tmux attach -t ${this.tmuxManager.getSessionName()}`);
       
     } catch (error) {
       this.emit('system-error', { error });
@@ -79,20 +84,13 @@ export class PDCAOrchestrator extends EventEmitter {
   }
 
   /**
-   * 創建並啟動代理
+   * 啟動代理
    */
-  private async createAndStartAgents(mission: string): Promise<void> {
-    console.log('🎭 創建代理實例...');
-    
-    // 使用風格引擎創建代理
-    this.agents = this.styleEngine.createAgents();
-    
-    console.log(`  ✅ 已創建 ${this.agents.size} 個代理`);
-    
+  private async startAgents(mission: string): Promise<void> {
     // 為每個代理設置 tmux target
-    let windowIndex = 1;
+    let windowIndex = 0;
     for (const [key, agent] of this.agents.entries()) {
-      agent.setTmuxTarget(`${this.tmuxManager.sessionName}:${windowIndex}`);
+      agent.setTmuxTarget(`${this.tmuxManager.getSessionName()}:${windowIndex}`);
       windowIndex++;
     }
     
@@ -109,17 +107,19 @@ export class PDCAOrchestrator extends EventEmitter {
     // 創建主 session
     await this.tmuxManager.createSession();
     
-    // 為每個代理創建窗口
+    // 第一個窗口已經由 createSession 創建為 'pdca-plan'
+    // 我們為其餘代理創建窗口
     const agentKeys = Array.from(this.agents.keys());
     
+    // 從第二個代理開始創建窗口（第一個用預設的 pdca-plan）
     for (let i = 1; i < agentKeys.length; i++) {
       const agentKey = agentKeys[i];
       const agent = this.agents.get(agentKey)!;
-      await this.tmuxManager.createWindow(agent.name, i + 1);
+      await this.tmuxManager.createWindow(agent.name, i);
     }
     
     // 創建監控窗口
-    await this.tmuxManager.createWindow('monitor', agentKeys.length + 1);
+    await this.tmuxManager.createWindow('monitor', agentKeys.length);
   }
 
   /**

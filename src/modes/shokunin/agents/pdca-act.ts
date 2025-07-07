@@ -56,7 +56,8 @@ export class PdcaActAgent extends BaseAgent {
   }
 
   protected getInitialPrompt(task: string): string {
-    return `${this.config.prompt}
+    const basePrompt = this.config?.prompt || '你是 PDCA Act 階段改善者，負責持續改進和優化。';
+    return `${basePrompt}
 
 當前任務: ${task}
 

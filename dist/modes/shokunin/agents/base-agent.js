@@ -15,11 +15,20 @@ export class BaseAgent extends EventEmitter {
     config;
     constructor(config) {
         super();
-        this.config = config;
-        this.name = config.name;
-        this.role = config.role;
-        this.icon = config.icon;
-        this.description = config.description;
+        if (config) {
+            this.config = config;
+            this.name = config.name;
+            this.role = config.role;
+            this.icon = config.icon;
+            this.description = config.description;
+        }
+        else {
+            // 允許子類別自行設置這些屬性
+            this.name = '';
+            this.role = '';
+            this.icon = '';
+            this.description = '';
+        }
     }
     get status() {
         return this._status;
@@ -121,9 +130,36 @@ export class BaseAgent extends EventEmitter {
         if (!this.tmuxTarget) {
             throw new Error('Tmux target 尚未設置');
         }
-        await ClaudeCliManager.startInTmux(this.tmuxTarget, this.config, task);
-        // 等待一下讓 Claude 啟動
-        await this.sleep(1000);
+        if (!this.config) {
+            throw new Error('代理配置尚未設置');
+        }
+        // 使用 getInitialPrompt 獲取提示詞，然後調用 startWithCommand
+        const prompt = this.getInitialPrompt(task);
+        await this.startWithCommand(prompt);
+    }
+    /**
+     * 使用自定義命令啟動代理
+     * 供 StyledAgent 使用
+     */
+    async startWithCommand(command) {
+        if (!this.tmuxTarget) {
+            throw new Error('Tmux target 尚未設置');
+        }
+        try {
+            this.setStatus('starting');
+            this.emit('starting', { agent: this.name });
+            // 在 tmux 中啟動 Claude CLI
+            await ClaudeCliManager.startInTmuxWithCommand(this.tmuxTarget, command);
+            // 等待啟動
+            await this.sleep(1000);
+            this.setStatus('running');
+            this.emit('started', { agent: this.name });
+        }
+        catch (error) {
+            this.setStatus('error');
+            this.emit('error', { agent: this.name, error });
+            throw error;
+        }
     }
     /**
      * 休眠工具函數

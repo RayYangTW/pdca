@@ -1,5 +1,5 @@
 /**
- * Shokunin 模式協調器
+ * Raiy-PDCA 協調器
  * 管理 5 個代理的並行執行
  */
 import { EventEmitter } from 'events';
@@ -11,7 +11,7 @@ export declare class ShokuninOrchestrator extends EventEmitter {
     private currentTask?;
     constructor(config: ShokuninConfig);
     /**
-     * 啟動 Shokunin 系統
+     * 啟動 Raiy-PDCA 系統
      */
     start(mission: string, options?: CLIOptions): Promise<void>;
     /**

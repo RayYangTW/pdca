@@ -7,6 +7,10 @@ export declare class TmuxManager {
     private sessionName;
     constructor(sessionName?: string);
     /**
+     * 獲取 session 名稱
+     */
+    getSessionName(): string;
+    /**
      * 檢查 tmux session 是否存在
      */
     hasSession(): Promise<boolean>;

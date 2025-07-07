@@ -83,6 +83,8 @@ export interface CLIOptions {
   agents?: number;
   mode?: 'pdca' | 'sparc';
   verbose?: boolean;
+  profile?: string;
+  config?: string;
 }
 
 // Tmux 相關

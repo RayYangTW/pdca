@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 /**
- * PDCA-Shokunin CLI 入口
+ * Raiy-PDCA CLI 入口
  * 支援 pdca -s "mission" 指令格式
  */
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import { ShokuninOrchestrator } from '../modes/shokunin/orchestrator.js';
+import { PDCAOrchestrator } from '../modes/shokunin/orchestrator-v2.js';
 const program = new Command();
 // 版本和基本資訊
 program
     .name('pdca')
-    .description('🎌 PDCA-Shokunin 職人級多代理協調系統')
+    .description('🎯 Raiy-PDCA 靈活的多代理協調系統')
     .version('3.0.0');
 // 主要指令：pdca -s "mission"
 program
-    .option('-s, --shokunin <mission>', '啟動 Shokunin 模式處理任務')
+    .option('-s, --shokunin <mission>', '啟動任務處理（預設職人模式）')
+    .option('-p, --profile <name>', '指定風格配置（shokunin/agile/enterprise等）')
+    .option('-c, --config <path>', '使用自定義配置檔案')
     .option('-d, --detach', '背景執行，不阻塞終端')
     .option('-m, --monitor', '啟動後直接進入監控模式')
     .option('-a, --agents <number>', '自定義代理數量（預設 5）', '5')
@@ -34,20 +36,20 @@ program
 // 快捷指令
 program
     .command('init')
-    .description('初始化當前專案的 PDCA-Shokunin 配置')
+    .description('初始化當前專案的 Raiy-PDCA 配置')
     .option('-f, --force', '強制覆蓋現有配置')
     .action(async (options) => {
     await handleShokuninCommand('init', options);
 });
 program
     .command('status')
-    .description('查看 PDCA-Shokunin 運行狀態')
+    .description('查看 Raiy-PDCA 運行狀態')
     .action(async () => {
     await handleShokuninCommand('status', {});
 });
 program
     .command('stop')
-    .description('停止 PDCA-Shokunin 系統')
+    .description('停止 Raiy-PDCA 系統')
     .action(async () => {
     await handleShokuninCommand('stop', {});
 });
@@ -73,6 +75,12 @@ program
     .action(async () => {
     await handleVerifySetup();
 });
+program
+    .command('list-styles')
+    .description('列出所有可用的風格配置')
+    .action(async () => {
+    await handleListStyles();
+});
 /**
  * 處理 Shokunin 模式指令
  */
@@ -93,7 +101,7 @@ async function handleShokuninCommand(mission, options) {
             return;
         }
         // 正常任務處理
-        console.log(chalk.blue.bold('🎌 PDCA-Shokunin Multi-Agent System'));
+        console.log(chalk.blue.bold('🎯 Raiy-PDCA Multi-Agent System'));
         console.log(chalk.gray('═'.repeat(50)));
         console.log(chalk.yellow(`📋 任務: ${mission}`));
         console.log();
@@ -102,29 +110,19 @@ async function handleShokuninCommand(mission, options) {
         await checkSystemRequirements();
         spinner.succeed('系統需求檢查完成');
         // 初始化協調器
-        const orchestrator = new ShokuninOrchestrator({
-            sessionName: 'pdca-shokunin',
-            language: 'zh-TW',
-            agents: [], // 使用預設代理配置
-            communication: {
-                method: 'file-based',
-                directory: '.pdca-shokunin/communication',
-                syncInterval: 5
-            },
-            monitoring: {
-                refreshRate: 1,
-                logLevel: 'INFO',
-                showTimestamps: true
-            }
-        });
+        const orchestrator = new PDCAOrchestrator();
         // 啟動系統
-        spinner.start('啟動 PDCA-Shokunin 系統...');
-        await orchestrator.start(mission, options);
+        spinner.start('啟動 Raiy-PDCA 系統...');
+        await orchestrator.start(mission, {
+            ...options,
+            profile: options.profile,
+            configFile: options.config
+        });
         if (!options.detach) {
             spinner.succeed('系統啟動完成');
             console.log();
-            console.log(chalk.green('✨ PDCA-Shokunin 系統運行中...'));
-            console.log(chalk.blue('📊 查看狀態: tmux attach -t pdca-shokunin'));
+            console.log(chalk.green('✨ Raiy-PDCA 系統運行中...'));
+            console.log(chalk.blue('📊 查看狀態: tmux attach -t raiy-pdca'));
             console.log(chalk.gray('💡 按 Ctrl+B 然後按數字鍵切換代理窗口'));
             console.log(chalk.gray('💡 按 Ctrl+B 然後按 d 分離 session'));
         }
@@ -194,7 +192,7 @@ async function checkSystemRequirements() {
  * 處理初始化
  */
 async function handleInit(options) {
-    console.log(chalk.blue('🎌 初始化 PDCA-Shokunin...'));
+    console.log(chalk.blue('🎯 初始化 Raiy-PDCA...'));
     // TODO: 實現初始化邏輯
     console.log(chalk.green('✅ 初始化完成'));
 }
@@ -203,15 +201,15 @@ async function handleInit(options) {
  */
 async function handleStatus() {
     const { spawn } = await import('child_process');
-    const tmux = spawn('tmux', ['has-session', '-t', 'pdca-shokunin'], { stdio: 'pipe' });
+    const tmux = spawn('tmux', ['has-session', '-t', 'raiy-pdca'], { stdio: 'pipe' });
     tmux.on('close', (code) => {
         if (code === 0) {
-            console.log(chalk.green('✓ PDCA-Shokunin 正在運行'));
+            console.log(chalk.green('✓ Raiy-PDCA 正在運行'));
             // 列出窗口
-            const listWindows = spawn('tmux', ['list-windows', '-t', 'pdca-shokunin'], { stdio: 'inherit' });
+            const listWindows = spawn('tmux', ['list-windows', '-t', 'raiy-pdca'], { stdio: 'inherit' });
         }
         else {
-            console.log(chalk.yellow('⚠ PDCA-Shokunin 未運行'));
+            console.log(chalk.yellow('⚠ Raiy-PDCA 未運行'));
         }
     });
 }
@@ -220,8 +218,8 @@ async function handleStatus() {
  */
 async function handleStop() {
     const { spawn } = await import('child_process');
-    const spinner = ora('停止 PDCA-Shokunin...').start();
-    const kill = spawn('tmux', ['kill-session', '-t', 'pdca-shokunin'], { stdio: 'pipe' });
+    const spinner = ora('停止 Raiy-PDCA...').start();
+    const kill = spawn('tmux', ['kill-session', '-t', 'raiy-pdca'], { stdio: 'pipe' });
     kill.on('close', (code) => {
         if (code === 0) {
             spinner.succeed('系統已停止');
@@ -323,6 +321,47 @@ async function handleVerifySetup() {
     }
     catch (error) {
         console.error(chalk.red(`❌ 驗證失敗: ${error instanceof Error ? error.message : '未知錯誤'}`));
+        process.exit(1);
+    }
+}
+/**
+ * 處理列出風格
+ */
+async function handleListStyles() {
+    const spinner = ora('載入風格配置...').start();
+    try {
+        const orchestrator = new PDCAOrchestrator();
+        const styles = await orchestrator.getAvailableStyles();
+        spinner.succeed('已載入可用風格');
+        console.log();
+        console.log(chalk.blue.bold('🎨 可用的風格配置：'));
+        console.log(chalk.gray('═'.repeat(50)));
+        for (const style of styles) {
+            console.log(`  • ${chalk.green(style)}`);
+            // 嘗試載入風格以顯示描述
+            try {
+                const { readFileSync } = await import('fs');
+                const { join } = await import('path');
+                const { parse } = await import('yaml');
+                const configPath = join(process.cwd(), 'agents', 'profiles', `${style}.yaml`);
+                const content = readFileSync(configPath, 'utf-8');
+                const config = parse(content);
+                if (config.description) {
+                    console.log(`    ${chalk.gray(config.description)}`);
+                }
+            }
+            catch {
+                // 忽略載入錯誤
+            }
+        }
+        console.log();
+        console.log(chalk.yellow('💡 使用方式：'));
+        console.log(chalk.gray('  pdca -s "任務" --profile <風格名稱>'));
+        console.log(chalk.gray('  例如：pdca -s "建立登入系統" --profile agile'));
+    }
+    catch (error) {
+        spinner.fail('載入風格失敗');
+        console.error(chalk.red(`❌ ${error instanceof Error ? error.message : '未知錯誤'}`));
         process.exit(1);
     }
 }

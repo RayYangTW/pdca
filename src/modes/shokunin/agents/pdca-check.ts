@@ -56,7 +56,8 @@ export class PdcaCheckAgent extends BaseAgent {
   }
 
   protected getInitialPrompt(task: string): string {
-    return `${this.config.prompt}
+    const basePrompt = this.config?.prompt || '你是 PDCA Check 階段驗證者，負責品質驗證和測試。';
+    return `${basePrompt}
 
 當前任務: ${task}
 
