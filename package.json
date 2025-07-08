@@ -15,7 +15,7 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "prepare": "npm run build",
-    "postinstall": "node scripts/setup-commands.js postinstall"
+    "postinstall": "node scripts/setup-commands.js postinstall && echo '✨ PDCA 已安裝！使用 claude 開啟 CLI，然後輸入 /pdca 開始。'"
   },
   "keywords": [
     "pdca",

@@ -10,19 +10,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 系統執行（TypeScript 版本）
 ```bash
-# 方式一：使用 -s 參數啟動（預設職人模式，推薦）
-pdca -s "你的任務描述"
+# 方式一：使用 CLI 直接啟動（推薦）
+pdca "你的任務描述"
 
-# 方式二：透過 Claude CLI 斜線指令
-/pdca "你的任務描述"
+# 方式二：在 Claude Code 中使用斜線指令
+/pdca:start                    # 啟動多代理系統
+/pdca:status                   # 查看運行狀態
+/pdca:monitor                  # 開啟監控介面
+/pdca:stop                     # 停止系統
 
-# 管理指令
+# CLI 管理指令
 pdca status                    # 查看運行狀態
 pdca stop                      # 停止系統
 pdca init                      # 初始化專案
+pdca setup-commands            # 安裝斜線指令
 
 # 監控執行中的代理
-tmux attach -t raiy-pdca
+tmux attach -t pdca
 ```
 
 ### 開發工具（可選）
@@ -37,7 +41,7 @@ black .
 flake8 .
 ```
 
-**注意**：本系統已升級為 TypeScript 版本，採用「職人精神」設計。使用 `pdca -s` 指令即可啟動 5 個並行的 Claude 實例。
+**注意**：本系統已升級為 TypeScript 版本，採用「職人精神」設計。使用 `pdca` 指令或 Claude Code 內的 `/pdca:start` 即可啟動 5 個並行的 Claude 實例。
 
 ### tmux 操作快捷鍵
 - **Ctrl+B 1-5**: 切換到代理視窗（plan/do/check/act/knowledge）
@@ -112,10 +116,17 @@ pdca_shokunin/          # Python 套件目錄（舊版本遺留，不影響運�
 
 ## 🚀 快速任務
 
-### 新增功能
-1. 啟動 PDCA 系統：`/pdca "新增功能 X"`
-2. 監控進度：`tmux attach -t raiy-pdca`
+### 新增功能（使用 CLI）
+1. 啟動 PDCA 系統：`pdca "新增功能 X"`
+2. 監控進度：`tmux attach -t pdca`
 3. 代理會自動協調工作
+
+### 使用 Claude Code 斜線指令
+1. 開啟 Claude Code：`claude`
+2. 啟動系統：`/pdca:start`
+3. 告訴我任務：例如「實作使用者登入功能」
+4. 查看狀態：`/pdca:status`
+5. 監控進度：`/pdca:monitor`
 
 ### 除錯問題
 1. 檢查代理日誌：`.raiy-pdca/logs/`
@@ -170,5 +181,5 @@ pdca_shokunin/          # Python 套件目錄（舊版本遺留，不影響運�
 ### 範例
 ```bash
 git add .
-git commit -m "[20250707] feat: 實作多風格配置系統"
+git commit -m "[20250708] feat: 實作多代理協調系統"
 ```
