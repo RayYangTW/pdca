@@ -6,20 +6,28 @@
 import { EventEmitter } from 'events';
 import { TmuxManager } from '../../core/tmux-manager.js';
 import { StyleEngine } from '../../core/style-engine.js';
+import { MultiClaudeManager } from '../../core/multi-claude-manager.js';
+import { CommunicationManager } from '../../core/communication-manager.js';
+import { MessageFactory, MessageType, AgentRole } from '../../core/message-protocol.js';
 import type { CLIOptions, Task, Agent } from '../../types/index.js';
 import type { RuntimeConfig, ConfigLoadOptions } from '../../types/config.js';
 
 export class PDCAOrchestrator extends EventEmitter {
   private tmuxManager: TmuxManager;
   private styleEngine: StyleEngine;
+  private multiClaudeManager: MultiClaudeManager;
+  private communicationManager: CommunicationManager;
   private agents: Map<string, Agent> = new Map();
   private currentTask?: Task;
   private runtimeConfig?: RuntimeConfig;
+  private useMultiClaude: boolean = false;
 
   constructor() {
     super();
     this.styleEngine = new StyleEngine();
     this.tmuxManager = new TmuxManager('pdca');
+    this.multiClaudeManager = new MultiClaudeManager('pdca');
+    this.communicationManager = new CommunicationManager();
   }
 
   /**

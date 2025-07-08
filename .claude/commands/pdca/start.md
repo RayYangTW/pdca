@@ -21,22 +21,30 @@ description: PDCA 多代理系統 - 啟動並行協作
 ### 檢查並停止現有 Session
 !`tmux kill-session -t pdca 2>/dev/null || echo "沒有現有 session"`
 
-### 啟動 PDCA 系統
-正在啟動 5 個並行的 Claude CLI 代理...
+### 建置系統（如果需要）
+!`cd /Users/rayyang/Raiy_Workspace/00_Raiy/dev/raiy-pdca && [ -d dist ] || npm run build`
 
-!`tmux new-session -d -s pdca -n "plan" "claude --no-interactive"`
-!`tmux new-window -t pdca:1 -n "do" "claude --no-interactive"`
-!`tmux new-window -t pdca:2 -n "check" "claude --no-interactive"`
-!`tmux new-window -t pdca:3 -n "act" "claude --no-interactive"`
-!`tmux new-window -t pdca:4 -n "knowledge" "claude --no-interactive"`
-!`tmux new-window -t pdca:5 -n "monitor" "node dist/core/monitor.js"`
+### 啟動協調器
+我將作為主協調者，管理 5 個並行的 Claude CLI 代理...
 
-### 初始化各代理
-!`echo '🎯 Plan Agent 已啟動' > .raiy-pdca/agents/plan.status`
-!`echo '🎨 Do Agent 已啟動' > .raiy-pdca/agents/do.status`
-!`echo '🔍 Check Agent 已啟動' > .raiy-pdca/agents/check.status`
-!`echo '🚀 Act Agent 已啟動' > .raiy-pdca/agents/act.status`
-!`echo '📝 Knowledge Agent 已啟動' > .raiy-pdca/agents/knowledge.status`
+```javascript
+// 初始化協調器介面
+const { coordinatorInterface } = await import('/Users/rayyang/Raiy_Workspace/00_Raiy/dev/raiy-pdca/dist/core/coordinator-interface.js');
+
+// 啟動系統
+await coordinatorInterface.start();
+
+// 設置全域函數供後續使用
+globalThis.pdca = {
+  assignTask: (task) => coordinatorInterface.assignTask(task),
+  status: () => coordinatorInterface.getStatus(),
+  help: () => coordinatorInterface.displayHelp()
+};
+```
+
+### 檢查啟動狀態
+!`sleep 2`
+!`tmux list-windows -t pdca 2>/dev/null || echo "系統正在初始化..."`
 
 ## ✅ 系統已啟動
 
