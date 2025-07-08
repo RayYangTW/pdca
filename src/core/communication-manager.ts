@@ -182,11 +182,11 @@ export class CommunicationManager extends EventEmitter {
     }
 
     const processedPath = join(processedDir, `${message.id}.json`);
-    const content = MessageSerializer.serialize({
+    const processedMessage = {
       ...message,
-      status: MessageStatus.COMPLETED,
-      processedAt: new Date().toISOString()
-    });
+      status: MessageStatus.COMPLETED
+    };
+    const content = MessageSerializer.serialize(processedMessage);
 
     writeFileSync(processedPath, content);
     unlinkSync(filePath);

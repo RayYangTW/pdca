@@ -186,11 +186,20 @@ export class MultiClaudeManager extends EventEmitter {
     writeFileSync(promptFile, agent.prompt);
 
     // 創建啟動腳本
-    const startScript = `
-#!/bin/bash
+    const startScript = `#!/bin/bash
 echo "🚀 啟動 ${agent.role} (${name})"
-echo "正在初始化..."
-claude --no-history "${agent.prompt}"
+echo "${agent.prompt}" > ${promptFile}
+echo "代理已初始化，等待任務..."
+echo "監控目錄: ${this.communicationDir}"
+
+# 持續運行，監控任務
+while true; do
+  if [ -f "${this.communicationDir}/current.task" ]; then
+    echo "📋 收到新任務"
+    cat "${this.communicationDir}/current.task"
+  fi
+  sleep 5
+done
 `;
 
     const scriptFile = join('.raiy-pdca', `start-${name}.sh`);

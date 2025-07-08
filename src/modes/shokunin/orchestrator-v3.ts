@@ -20,6 +20,7 @@ export interface OrchestratorOptions {
   sessionName?: string;
   enableMonitoring?: boolean;
   communicationDir?: string;
+  useSimulation?: boolean;  // 使用模擬代理而非真實 Claude CLI
 }
 
 export class PDCAOrchestratorV3 extends EventEmitter {

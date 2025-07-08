@@ -17,7 +17,9 @@
       "Bash(npm run postinstall:*)",
       "Bash(npm install:*)",
       "Bash(tmux list-sessions:*)",
-      "WebFetch(domain:www.pulsemcp.com)"
+      "WebFetch(domain:www.pulsemcp.com)",
+      "Bash(tmux new-session:*)",
+      "Bash(tmux kill-session:*)"
     ],
     "deny": []
   }
