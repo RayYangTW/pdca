@@ -1,7 +1,7 @@
 {
   "name": "pdca",
   "version": "3.0.0",
-  "description": "🎯 靈活的多代理協調系統 - 支援多種風格的 5 個 Claude 實例並行協作",
+  "description": "🎯 AI 驅動的 PDCA 多代理開發系統 - 支援 Claude、Gemini、OpenAI 等多種 AI 引擎",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,17 +15,20 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "prepare": "npm run build",
-    "postinstall": "node scripts/setup-commands.js postinstall && echo '✨ PDCA 已安裝！使用 claude 開啟 CLI，然後輸入 /pdca 開始。'"
+    "postinstall": "node scripts/setup-commands.js postinstall && echo '✨ PDCA 已安裝！使用 pdca 指令開始，或在 Claude Code 中使用 /pdca。'"
   },
   "keywords": [
     "pdca",
-    "claude",
-    "multi-agent",
     "ai",
+    "claude",
+    "gemini",
+    "openai",
+    "multi-agent",
+    "agent",
     "orchestration",
     "tmux",
-    "configurable",
-    "協調系統",
+    "development",
+    "automation",
     "typescript"
   ],
   "author": {
