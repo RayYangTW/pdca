@@ -232,7 +232,7 @@ A: 支援 WSL（Windows Subsystem for Linux）：
 
 ```bash
 # Clone 專案
-git clone https://github.com/yourusername/pdca
+git clone https://github.com/RayYangTW/pdca
 cd pdca
 
 # 安裝依賴
@@ -277,7 +277,7 @@ MIT License - 詳見 [LICENSE](LICENSE)
 </p>
 
 <p align="center">
-  <a href="https://github.com/yourusername/pdca/issues">回報問題</a> •
-  <a href="https://github.com/yourusername/pdca/discussions">討論區</a> •
-  <a href="https://github.com/yourusername/pdca/wiki">Wiki</a>
+  <a href="https://github.com/RayYangTW/pdca/issues">回報問題</a> •
+  <a href="https://github.com/RayYangTW/pdca/discussions">討論區</a> •
+  <a href="https://github.com/RayYangTW/pdca/wiki">Wiki</a>
 </p>

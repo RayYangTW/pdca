@@ -32,19 +32,19 @@
     "typescript"
   ],
   "author": {
-    "name": "Raiy Yang",
-    "email": "raiy@example.com",
-    "url": "https://github.com/raiyyang"
+    "name": "Raiy",
+    "email": "ping@raiy.ai",
+    "url": "https://github.com/RayYangTW"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raiyyang/pdca.git"
+    "url": "https://github.com/RayYangTW/pdca.git"
   },
   "bugs": {
-    "url": "https://github.com/raiyyang/pdca/issues"
+    "url": "https://github.com/RayYangTW/pdca/issues"
   },
-  "homepage": "https://github.com/raiyyang/pdca",
+  "homepage": "https://github.com/RayYangTW/pdca",
   "engines": {
     "node": ">=18.0.0"
   },
