@@ -19,7 +19,8 @@
       "Bash(tmux list-sessions:*)",
       "WebFetch(domain:www.pulsemcp.com)",
       "Bash(tmux new-session:*)",
-      "Bash(tmux kill-session:*)"
+      "Bash(tmux kill-session:*)",
+      "Bash(git rm:*)"
     ],
     "deny": []
   }
