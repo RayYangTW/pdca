@@ -1,7 +1,7 @@
 {
   "name": "pdca",
-  "version": "3.0.0",
-  "description": "🎯 AI 驅動的 PDCA 多代理開發系統 - 支援 Claude、Gemini、OpenAI 等多種 AI 引擎",
+  "version": "3.1.0",
+  "description": "🎯 AI 驅動的 PDCA 多代理開發系統 - 智能循環控制 + 成本管理 + 多 AI 引擎支援",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,7 +30,11 @@
     "tmux",
     "development",
     "automation",
-    "typescript"
+    "typescript",
+    "loop-control",
+    "cost-management",
+    "configuration",
+    "cli"
   ],
   "author": {
     "name": "Raiy",
