@@ -62,6 +62,31 @@ export interface CommunicationConfig {
 }
 
 /**
+ * 循環控制配置
+ */
+export interface LoopControlConfig {
+  max_iterations: number | null;         // 最大迭代次數，null = 無限制
+  quality_target: number;                // 品質目標 (0.0-1.0)
+  marginal_threshold: number;            // 邊際改進閾值 (0.0-1.0)
+  token_budget: number | null;           // Token 預算，null = 無限制
+  time_budget_minutes: number | null;    // 時間預算（分鐘），null = 無限制
+  auto_continue: boolean;                // 是否自動繼續下一輪
+  require_confirmation: boolean;         // 每輪是否需要用戶確認
+}
+
+/**
+ * 成本控制配置
+ */
+export interface CostControlConfig {
+  show_realtime: boolean;                // 是否即時顯示成本
+  warn_at_percent: number | null;        // 在多少百分比時警告，null = 不警告
+  hard_stop_at_tokens: number | null;    // 硬停止 token 數，null = 無限制
+  track_by_agent: boolean;               // 是否按代理追蹤成本
+  currency: 'USD' | 'TWD' | 'CNY';       // 顯示貨幣
+  pricing_model?: Record<string, number>; // 各引擎定價
+}
+
+/**
  * 執行配置
  */
 export interface ExecutionConfig {
@@ -70,6 +95,10 @@ export interface ExecutionConfig {
   startup_delay: number;
   health_check_interval: number;
   error_recovery: 'automatic' | 'manual' | 'fail-fast';
+  
+  // 新增循環和成本控制
+  loop_control: LoopControlConfig;
+  cost_control: CostControlConfig;
 }
 
 /**
@@ -139,6 +168,16 @@ export interface RuntimeConfig extends AgentProfile {
 }
 
 /**
+ * 配置模式定義
+ */
+export interface ConfigProfile {
+  name: string;
+  description: string;
+  execution: Partial<ExecutionConfig>;
+  [key: string]: any; // 允許覆蓋其他配置
+}
+
+/**
  * 配置載入選項
  */
 export interface ConfigLoadOptions {
@@ -146,6 +185,8 @@ export interface ConfigLoadOptions {
   configFile?: string;
   overrides?: Partial<AgentProfile>;
   validateOnly?: boolean;
+  cliOverrides?: Record<string, any>;    // CLI 參數覆蓋
+  envOverrides?: Record<string, any>;    // 環境變數覆蓋
 }
 
 /**

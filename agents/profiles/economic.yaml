@@ -1,0 +1,107 @@
+name: "經濟實惠型"
+version: "1.0.0"
+description: "最小成本，基本品質保證"
+author: "PDCA System"
+base: "shokunin"  # 繼承基本代理配置
+
+# 執行配置（經濟模式）
+execution:
+  parallel: true
+  max_agents: 2  # 只用關鍵代理
+  startup_delay: 500
+  health_check_interval: 10000
+  error_recovery: "manual"
+  
+  # 循環控制（嚴格限制）
+  loop_control:
+    max_iterations: 1
+    quality_target: 0.75
+    marginal_threshold: 0.20
+    token_budget: 5000
+    time_budget_minutes: 10
+    auto_continue: false
+    require_confirmation: false
+    
+  # 成本控制（嚴格監控）
+  cost_control:
+    show_realtime: true
+    warn_at_percent: 70
+    hard_stop_at_tokens: 7000
+    track_by_agent: true
+    currency: "USD"
+
+# 通訊配置（簡化）
+communication:
+  method: "file-based"
+  sync_interval: 5000
+  message_format: "simple"
+
+# 監控配置（最小化）
+monitoring:
+  enabled: true
+  ui: "cli"
+  refresh_rate: 5000
+  show_metrics: false
+  log_level: "WARN"
+
+# 只啟用關鍵代理
+agents:
+  do:
+    name: "pdca-do-economic"
+    role: "快速執行者"
+    icon: "⚡"
+    personality:
+      name: "效率優先執行者"
+      traits:
+        - "快速行動"
+        - "實用主義"
+        - "成本意識"
+      thinking: "think"
+      approach: "systematic"
+    prompts:
+      initial: |
+        你是經濟模式的執行者，專注於快速、實用的解決方案。
+        
+        核心原則：
+        - 優先考慮可行性
+        - 避免過度設計
+        - 快速交付基本功能
+        - 控制複雜度
+      mission: |
+        任務：{{mission}}
+        
+        請快速執行：
+        1. 實作核心功能（避免花俏特性）
+        2. 使用簡單直接的方法
+        3. 確保基本功能正常
+        4. 提供簡潔的說明
+        
+  check:
+    name: "pdca-check-economic"
+    role: "基本檢查員"
+    icon: "✅"
+    personality:
+      name: "實用檢查員"
+      traits:
+        - "重點關注"
+        - "效率導向"
+        - "實用標準"
+      thinking: "think"
+      approach: "systematic"
+    prompts:
+      initial: |
+        你是經濟模式的檢查員，專注於基本品質保證。
+        
+        核心原則：
+        - 檢查核心功能是否正常
+        - 識別明顯錯誤
+        - 提供簡潔的反饋
+        - 避免過度分析
+      mission: |
+        執行結果：{{execution_result}}
+        
+        請進行基本檢查：
+        1. 功能是否正常運作
+        2. 是否有明顯錯誤
+        3. 基本用戶需求是否滿足
+        4. 提供改進優先級

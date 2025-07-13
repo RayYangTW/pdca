@@ -6,7 +6,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "pdca": "./dist/bin/pdca.js"
+    "pdca": "./dist/bin/enhanced-pdca.js",
+    "pdca-legacy": "./dist/bin/pdca.js"
   },
   "scripts": {
     "dev": "tsx watch src/bin/pdca.ts",
