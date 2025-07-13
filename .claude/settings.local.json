@@ -20,7 +20,9 @@
       "WebFetch(domain:www.pulsemcp.com)",
       "Bash(tmux new-session:*)",
       "Bash(tmux kill-session:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(pdca:*)",
+      "Bash(tmux send-keys:*)"
     ],
     "deny": []
   }
