@@ -43,5 +43,6 @@ coverage/
 # Project specific
 .raiy-pdca/
 .pdca-shokunin/
-memories/short_term/
-memories/logs/
+
+# Local memory files (should not be in repo)
+memories/
