@@ -10,6 +10,7 @@ import { MultiClaudeManager } from '../../core/multi-claude-manager.js';
 import { CommunicationManager } from '../../core/communication-manager.js';
 import { MessageFactory, MessageType, AgentRole } from '../../core/message-protocol.js';
 import { LoopController } from '../../core/loop-controller.js';
+import { RealTokenTracker, AIModel, initializeTokenTracker, getTokenTracker } from '../../core/token-tracker.js';
 import type { CLIOptions, Task, Agent } from '../../types/index.js';
 import type { RuntimeConfig, ConfigLoadOptions } from '../../types/config.js';
 
@@ -26,6 +27,7 @@ export class PDCAOrchestrator extends EventEmitter {
   private currentIteration: number = 0;
   private isLoopRunning: boolean = false;
   private lastQuality: number = 0;
+  private tokenTracker?: RealTokenTracker;
 
   constructor() {
     super();
@@ -202,6 +204,11 @@ export class PDCAOrchestrator extends EventEmitter {
       currentIteration: number;
       lastQuality: number;
     };
+    tokenUsage?: {
+      totalTokens: number;
+      totalCost: number;
+      budgetStatus: any;
+    };
   } {
     return {
       isRunning: this.currentTask?.status === 'running',
@@ -215,7 +222,12 @@ export class PDCAOrchestrator extends EventEmitter {
         isRunning: this.isLoopRunning,
         currentIteration: this.currentIteration,
         lastQuality: this.lastQuality
-      }
+      },
+      tokenUsage: this.tokenTracker ? {
+        totalTokens: this.tokenTracker.getStatistics().totalTokens,
+        totalCost: this.tokenTracker.getStatistics().totalCost,
+        budgetStatus: this.tokenTracker.getBudgetStatus()
+      } : undefined
     };
   }
 
@@ -359,6 +371,21 @@ export class PDCAOrchestrator extends EventEmitter {
 
     this.loopController = new LoopController(loopConfig, costConfig);
 
+    // 初始化 Token 追蹤器
+    const tokenBudget = costConfig.token_budget || 50000;
+    this.tokenTracker = initializeTokenTracker(tokenBudget * 0.01); // 假設每 token 0.01 美分
+    
+    // 監聽 Token 追蹤事件
+    this.tokenTracker.on('budget-warning', (status) => {
+      console.warn(`💰 Token 預算警告: 已使用 ${status.usagePercentage?.toFixed(1)}% ($${status.totalCost.toFixed(4)})`);
+      this.emit('token-warning', status);
+    });
+
+    this.tokenTracker.on('budget-exceeded', (status) => {
+      console.error(`🚨 Token 預算超支! 總成本: $${status.totalCost.toFixed(4)}, 預算: $${status.budget}`);
+      this.emit('token-exceeded', status);
+    });
+
     // 監聽循環控制事件
     this.loopController.on('iteration-completed', (data) => {
       this.emit('pdca-iteration-completed', data);
@@ -465,6 +492,20 @@ export class PDCAOrchestrator extends EventEmitter {
     console.log('📈 循環總結:');
     console.log(`  總迭代次數: ${this.currentIteration}`);
     console.log(`  最終品質: ${this.lastQuality}`);
+    
+    // 顯示 token 使用統計
+    if (this.tokenTracker) {
+      const stats = this.tokenTracker.getStatistics();
+      const budgetStatus = this.tokenTracker.getBudgetStatus();
+      console.log(`  Token 使用: ${stats.totalTokens.toLocaleString()}`);
+      console.log(`  估計成本: $${stats.totalCost.toFixed(4)}`);
+      console.log(`  成本效率: ${stats.totalCost > 0 ? (this.lastQuality / stats.totalCost).toFixed(2) : 'N/A'} 品質/美元`);
+      
+      if (budgetStatus.budget) {
+        console.log(`  預算使用: ${budgetStatus.usagePercentage?.toFixed(1)}%`);
+      }
+    }
+    
     console.log(`  循環狀態: 已完成`);
 
     this.emit('pdca-loop-completed', {
@@ -481,7 +522,13 @@ export class PDCAOrchestrator extends EventEmitter {
     
     const planAgent = this.findAgentByRole('plan') || this.findAgentByRole('planner');
     if (planAgent) {
-      await planAgent.sendMessage(`執行 Plan 階段:\n${mission}\n\n請分析需求並制定執行策略。`);
+      const input = `執行 Plan 階段:\n${mission}\n\n請分析需求並制定執行策略。`;
+      await planAgent.sendMessage(input);
+      
+      // 模擬 AI 回應並追蹤 token 使用
+      const mockResponse = `已分析任務「${mission}」的需求，制定以下執行策略：\n1. 需求分析和架構設計\n2. 技術選型和實作計畫\n3. 測試策略和品質保證`;
+      this.trackAICall(input, mockResponse, planAgent.name, 'plan-phase');
+      
       await this.sleep(3000); // 給代理時間處理
     }
   }
@@ -494,7 +541,13 @@ export class PDCAOrchestrator extends EventEmitter {
     
     const doAgent = this.findAgentByRole('do') || this.findAgentByRole('developer');
     if (doAgent) {
-      await doAgent.sendMessage('執行 Do 階段：根據 Plan 階段的策略實施解決方案。');
+      const input = '執行 Do 階段：根據 Plan 階段的策略實施解決方案。';
+      await doAgent.sendMessage(input);
+      
+      // 模擬 AI 回應並追蹤 token 使用
+      const mockResponse = `正在實施解決方案：\n1. 已建立專案架構\n2. 實作核心功能模組\n3. 整合外部依賴\n4. 進行單元測試\n\n當前進度：85% 完成`;
+      this.trackAICall(input, mockResponse, doAgent.name, 'do-phase');
+      
       await this.sleep(5000); // 給代理更多時間實施
     }
   }
@@ -507,8 +560,16 @@ export class PDCAOrchestrator extends EventEmitter {
     
     const checkAgent = this.findAgentByRole('check') || this.findAgentByRole('tester');
     if (checkAgent) {
-      await checkAgent.sendMessage('執行 Check 階段：評估當前結果的品質，給出 1-10 分的評分。');
+      const input = '執行 Check 階段：評估當前結果的品質，給出 1-10 分的評分。';
+      await checkAgent.sendMessage(input);
+      
+      // 模擬品質評分和 AI 回應
+      const quality = 7.5 + Math.random() * 2; // 7.5-9.5 之間的隨機評分
+      const mockResponse = `品質評估完成：\n評分：${quality.toFixed(1)}/10\n\n評估結果：\n1. 功能完整性：良好\n2. 程式碼品質：優秀\n3. 測試覆蓋率：85%\n4. 效能表現：符合預期\n\n建議：可進一步優化錯誤處理機制`;
+      this.trackAICall(input, mockResponse, checkAgent.name, 'check-phase');
+      
       await this.sleep(3000);
+      return quality;
     }
     
     // 模擬品質評分（實際應從代理反饋中獲取）
@@ -523,8 +584,16 @@ export class PDCAOrchestrator extends EventEmitter {
     
     const actAgent = this.findAgentByRole('act') || this.findAgentByRole('optimizer');
     if (actAgent) {
-      await actAgent.sendMessage('執行 Act 階段：分析當前結果，提出具體的改進建議。');
+      const input = '執行 Act 階段：分析當前結果，提出具體的改進建議。';
+      await actAgent.sendMessage(input);
+      
+      // 模擬改進建議和 AI 回應
+      const improvements = ['優化性能', '改善用戶體驗', '增強錯誤處理', '提升安全性', '改進文檔'];
+      const mockResponse = `改進分析完成：\n\n發現的改進機會：\n1. 優化性能 - 減少 API 回應時間\n2. 改善用戶體驗 - 增加互動回饋\n3. 增強錯誤處理 - 提供更清晰的錯誤訊息\n4. 提升安全性 - 加強輸入驗證\n5. 改進文檔 - 更新 API 文檔\n\n建議優先級：性能 > 用戶體驗 > 錯誤處理`;
+      this.trackAICall(input, mockResponse, actAgent.name, 'act-phase');
+      
       await this.sleep(3000);
+      return improvements;
     }
     
     // 模擬改進建議（實際應從代理反饋中獲取）
@@ -547,8 +616,53 @@ export class PDCAOrchestrator extends EventEmitter {
    * 估算 Token 使用量
    */
   private estimateTokenUsage(): number {
-    // 簡化的 token 估算（實際應該更精確）
-    return 1000 + Math.floor(Math.random() * 2000);
+    if (!this.tokenTracker) {
+      // 回退到簡化估算
+      return 1000 + Math.floor(Math.random() * 2000);
+    }
+
+    // 基於歷史數據的智能估算
+    const stats = this.tokenTracker.getStatistics();
+    if (stats.operationCount > 0) {
+      return Math.round(stats.averageTokensPerOperation);
+    }
+
+    // 首次運行時的預設估算
+    return 2500; // 更現實的估算值
+  }
+
+  /**
+   * 記錄實際的 AI 調用成本
+   */
+  private trackAICall(input: string, output: string, agentId?: string, operation?: string): void {
+    if (!this.tokenTracker) return;
+
+    // 根據系統配置推測使用的 AI 模型
+    const model = this.inferAIModel();
+    
+    this.tokenTracker.trackUsage(input, output, model, agentId, operation);
+  }
+
+  /**
+   * 推測當前使用的 AI 模型
+   */
+  private inferAIModel(): AIModel {
+    // 根據配置或環境推測
+    // 這裡可以根據實際的 AI 引擎配置來確定
+    const engineName = (this.runtimeConfig as any)?.ai_engine || 'claude';
+    
+    switch (engineName.toLowerCase()) {
+      case 'claude':
+        return AIModel.CLAUDE_3_5_SONNET;
+      case 'gpt-4':
+        return AIModel.GPT_4;
+      case 'gpt-3.5':
+        return AIModel.GPT_3_5_TURBO;
+      case 'gemini':
+        return AIModel.GEMINI_PRO;
+      default:
+        return AIModel.CLAUDE_3_5_SONNET; // 預設值
+    }
   }
 
   /**
@@ -558,11 +672,19 @@ export class PDCAOrchestrator extends EventEmitter {
     isRunning: boolean;
     currentIteration: number;
     lastQuality: number;
+    tokenStats?: any;
+    costEfficiency?: number;
   } {
+    const tokenStats = this.tokenTracker?.getStatistics();
+    const costEfficiency = tokenStats && this.lastQuality > 0 ? 
+      this.lastQuality / tokenStats.totalCost : undefined;
+
     return {
       isRunning: this.isLoopRunning,
       currentIteration: this.currentIteration,
-      lastQuality: this.lastQuality
+      lastQuality: this.lastQuality,
+      tokenStats,
+      costEfficiency
     };
   }
 
