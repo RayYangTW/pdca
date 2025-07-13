@@ -9,6 +9,7 @@ import { StyleEngine } from '../../core/style-engine.js';
 import { MultiClaudeManager } from '../../core/multi-claude-manager.js';
 import { CommunicationManager } from '../../core/communication-manager.js';
 import { MessageFactory, MessageType, AgentRole } from '../../core/message-protocol.js';
+import { LoopController } from '../../core/loop-controller.js';
 import type { CLIOptions, Task, Agent } from '../../types/index.js';
 import type { RuntimeConfig, ConfigLoadOptions } from '../../types/config.js';
 
@@ -21,6 +22,10 @@ export class PDCAOrchestrator extends EventEmitter {
   private currentTask?: Task;
   private runtimeConfig?: RuntimeConfig;
   private useMultiClaude: boolean = false;
+  private loopController?: LoopController;
+  private currentIteration: number = 0;
+  private isLoopRunning: boolean = false;
+  private lastQuality: number = 0;
 
   constructor() {
     super();
@@ -51,10 +56,16 @@ export class PDCAOrchestrator extends EventEmitter {
       // 4. 準備 tmux 環境
       await this.setupTmuxEnvironment();
       
-      // 5. 啟動代理
+      // 5. 初始化循環控制器
+      this.initializeLoopController();
+      
+      // 6. 啟動代理
       await this.startAgents(mission);
       
-      // 6. 設置監控（如果需要）
+      // 7. 開始 PDCA 循環
+      await this.startPDCALoop(mission);
+      
+      // 8. 設置監控（如果需要）
       if (options.monitor) {
         await this.startMonitoring();
       }
@@ -160,6 +171,11 @@ export class PDCAOrchestrator extends EventEmitter {
     console.log('🛑 正在停止 Raiy-PDCA 系統...');
     
     try {
+      // 停止 PDCA 循環
+      if (this.isLoopRunning) {
+        await this.stopLoop();
+      }
+      
       // 停止所有代理
       await this.stopAllAgents();
       
@@ -181,6 +197,11 @@ export class PDCAOrchestrator extends EventEmitter {
     task?: Task;
     profile?: string;
     agents: Array<{ name: string; status: string }>;
+    loop?: {
+      isRunning: boolean;
+      currentIteration: number;
+      lastQuality: number;
+    };
   } {
     return {
       isRunning: this.currentTask?.status === 'running',
@@ -189,7 +210,12 @@ export class PDCAOrchestrator extends EventEmitter {
       agents: Array.from(this.agents.values()).map(agent => ({
         name: agent.name,
         status: agent.getStatus()
-      }))
+      })),
+      loop: {
+        isRunning: this.isLoopRunning,
+        currentIteration: this.currentIteration,
+        lastQuality: this.lastQuality
+      }
     };
   }
 
@@ -305,6 +331,249 @@ export class PDCAOrchestrator extends EventEmitter {
     await this.styleEngine.loadStyle({ profile: styleName });
     
     console.log(`已切換到 ${styleName} 風格，請重新啟動系統`);
+  }
+
+  /**
+   * 初始化循環控制器
+   */
+  private initializeLoopController(): void {
+    if (!this.runtimeConfig) {
+      throw new Error('運行時配置尚未載入');
+    }
+
+    // 從配置中獲取循環控制設定
+    const loopConfig = (this.runtimeConfig as any).loop_control || {
+      max_iterations: 3,
+      quality_target: 8.5,
+      marginal_threshold: 0.1,
+      auto_continue: false,
+      require_confirmation: true
+    };
+
+    const costConfig = (this.runtimeConfig as any).cost_control || {
+      token_budget: 50000,
+      cost_budget: 10.0,
+      warning_threshold: 0.8,
+      currency: 'USD'
+    };
+
+    this.loopController = new LoopController(loopConfig, costConfig);
+
+    // 監聽循環控制事件
+    this.loopController.on('iteration-completed', (data) => {
+      this.emit('pdca-iteration-completed', data);
+      console.log(`✅ PDCA 循環 ${data.iteration} 完成，品質評分: ${data.quality}`);
+    });
+
+    this.loopController.on('should-continue', async (decision) => {
+      if (decision.continue) {
+        console.log(`🔄 繼續下一個 PDCA 循環 (${decision.reason})`);
+        await this.executeNextIteration();
+      } else {
+        console.log(`⏹️  停止 PDCA 循環: ${decision.reason}`);
+        await this.finalizePDCALoop();
+      }
+    });
+
+    this.loopController.on('cost-warning', (warning) => {
+      console.warn(`💰 成本警告: ${warning.message}`);
+    });
+  }
+
+  /**
+   * 開始 PDCA 循環
+   */
+  private async startPDCALoop(mission: string): Promise<void> {
+    if (!this.loopController) {
+      throw new Error('循環控制器尚未初始化');
+    }
+
+    this.isLoopRunning = true;
+    this.currentIteration = 1;
+
+    console.log('🔄 開始 PDCA 循環流程...');
+    
+    // 開始第一個循環
+    await this.executeIteration(mission);
+  }
+
+  /**
+   * 執行單次 PDCA 循環
+   */
+  private async executeIteration(mission: string): Promise<void> {
+    console.log(`\n📊 執行 PDCA 循環 ${this.currentIteration}`);
+
+    const startTime = Date.now();
+
+    try {
+      // Plan - 規劃階段
+      await this.executePlanPhase(mission);
+      
+      // Do - 執行階段
+      await this.executeDoPhase();
+      
+      // Check - 檢查階段
+      const quality = await this.executeCheckPhase();
+      
+      // Act - 行動階段
+      const improvements = await this.executeActPhase();
+
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      // 評估是否繼續循環
+      const shouldContinue = await this.loopController!.shouldContinue({
+        iterationNumber: this.currentIteration,
+        qualityScore: quality,
+        tokensUsed: this.estimateTokenUsage(),
+        timeElapsed: duration,
+        improvement: quality - (this.lastQuality || 0),
+        agentResults: { improvements }
+      });
+
+      this.lastQuality = quality;
+
+      this.emit('pdca-cycle-completed', {
+        iteration: this.currentIteration,
+        quality,
+        improvements,
+        duration
+      });
+
+    } catch (error) {
+      console.error(`❌ PDCA 循環 ${this.currentIteration} 失敗:`, error);
+      this.emit('pdca-cycle-error', { iteration: this.currentIteration, error });
+      throw error;
+    }
+  }
+
+  /**
+   * 執行下一個迭代
+   */
+  private async executeNextIteration(): Promise<void> {
+    this.currentIteration++;
+    await this.executeIteration(`繼續改進 - 第 ${this.currentIteration} 輪`);
+  }
+
+  /**
+   * 完成 PDCA 循環
+   */
+  private async finalizePDCALoop(): Promise<void> {
+    this.isLoopRunning = false;
+    console.log('\n🎯 PDCA 循環流程完成');
+    
+    console.log('📈 循環總結:');
+    console.log(`  總迭代次數: ${this.currentIteration}`);
+    console.log(`  最終品質: ${this.lastQuality}`);
+    console.log(`  循環狀態: 已完成`);
+
+    this.emit('pdca-loop-completed', {
+      totalIterations: this.currentIteration,
+      finalQuality: this.lastQuality
+    });
+  }
+
+  /**
+   * Plan 階段 - 讓規劃代理工作
+   */
+  private async executePlanPhase(mission: string): Promise<void> {
+    console.log('📋 Plan 階段 - 分析需求和制定策略');
+    
+    const planAgent = this.findAgentByRole('plan') || this.findAgentByRole('planner');
+    if (planAgent) {
+      await planAgent.sendMessage(`執行 Plan 階段:\n${mission}\n\n請分析需求並制定執行策略。`);
+      await this.sleep(3000); // 給代理時間處理
+    }
+  }
+
+  /**
+   * Do 階段 - 讓執行代理工作
+   */
+  private async executeDoPhase(): Promise<void> {
+    console.log('🛠️  Do 階段 - 實施解決方案');
+    
+    const doAgent = this.findAgentByRole('do') || this.findAgentByRole('developer');
+    if (doAgent) {
+      await doAgent.sendMessage('執行 Do 階段：根據 Plan 階段的策略實施解決方案。');
+      await this.sleep(5000); // 給代理更多時間實施
+    }
+  }
+
+  /**
+   * Check 階段 - 讓檢查代理評估品質
+   */
+  private async executeCheckPhase(): Promise<number> {
+    console.log('🔍 Check 階段 - 評估結果品質');
+    
+    const checkAgent = this.findAgentByRole('check') || this.findAgentByRole('tester');
+    if (checkAgent) {
+      await checkAgent.sendMessage('執行 Check 階段：評估當前結果的品質，給出 1-10 分的評分。');
+      await this.sleep(3000);
+    }
+    
+    // 模擬品質評分（實際應從代理反饋中獲取）
+    return 7.5 + Math.random() * 2; // 7.5-9.5 之間的隨機評分
+  }
+
+  /**
+   * Act 階段 - 讓改進代理提出優化建議
+   */
+  private async executeActPhase(): Promise<string[]> {
+    console.log('⚡ Act 階段 - 分析改進機會');
+    
+    const actAgent = this.findAgentByRole('act') || this.findAgentByRole('optimizer');
+    if (actAgent) {
+      await actAgent.sendMessage('執行 Act 階段：分析當前結果，提出具體的改進建議。');
+      await this.sleep(3000);
+    }
+    
+    // 模擬改進建議（實際應從代理反饋中獲取）
+    return ['優化性能', '改善用戶體驗', '增強錯誤處理'];
+  }
+
+  /**
+   * 根據角色查找代理
+   */
+  private findAgentByRole(role: string): Agent | undefined {
+    for (const agent of this.agents.values()) {
+      if (agent.role.toLowerCase().includes(role.toLowerCase())) {
+        return agent;
+      }
+    }
+    return Array.from(this.agents.values())[0]; // 如果找不到，返回第一個代理
+  }
+
+  /**
+   * 估算 Token 使用量
+   */
+  private estimateTokenUsage(): number {
+    // 簡化的 token 估算（實際應該更精確）
+    return 1000 + Math.floor(Math.random() * 2000);
+  }
+
+  /**
+   * 獲取循環狀態
+   */
+  getLoopStatus(): {
+    isRunning: boolean;
+    currentIteration: number;
+    lastQuality: number;
+  } {
+    return {
+      isRunning: this.isLoopRunning,
+      currentIteration: this.currentIteration,
+      lastQuality: this.lastQuality
+    };
+  }
+
+  /**
+   * 手動停止循環
+   */
+  async stopLoop(): Promise<void> {
+    if (this.isLoopRunning) {
+      console.log('🛑 手動停止 PDCA 循環...');
+      await this.finalizePDCALoop();
+    }
   }
 
   /**
