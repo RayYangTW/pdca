@@ -448,6 +448,9 @@ export class PDCAOrchestrator extends EventEmitter {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
+      // 智能早停分析
+      const costEfficiencyDecision = this.analyzeCostEfficiency(quality, improvements, duration);
+      
       // 評估是否繼續循環
       const shouldContinue = await this.loopController!.shouldContinue({
         iterationNumber: this.currentIteration,
@@ -457,6 +460,13 @@ export class PDCAOrchestrator extends EventEmitter {
         improvement: quality - (this.lastQuality || 0),
         agentResults: { improvements }
       });
+
+      // 結合成本效益分析和循環控制決策
+      if (!costEfficiencyDecision.shouldContinue) {
+        console.log(`🧠 智能早停: ${costEfficiencyDecision.reason}`);
+        await this.finalizePDCALoop();
+        return;
+      }
 
       this.lastQuality = quality;
 
@@ -663,6 +673,96 @@ export class PDCAOrchestrator extends EventEmitter {
       default:
         return AIModel.CLAUDE_3_5_SONNET; // 預設值
     }
+  }
+
+  /**
+   * 智能成本效益分析
+   */
+  private analyzeCostEfficiency(quality: number, improvements: string[], duration: number): {
+    shouldContinue: boolean;
+    reason: string;
+    confidence: number;
+    metrics: any;
+  } {
+    if (!this.tokenTracker) {
+      return { shouldContinue: true, reason: 'Token 追蹤器未初始化', confidence: 0.5, metrics: {} };
+    }
+
+    const stats = this.tokenTracker.getStatistics();
+    const budgetStatus = this.tokenTracker.getBudgetStatus();
+    
+    // 計算關鍵指標
+    const currentCostEfficiency = quality > 0 && stats.totalCost > 0 ? quality / stats.totalCost : 0;
+    const improvementRate = this.currentIteration > 1 ? 
+      (quality - this.lastQuality) / (this.currentIteration - 1) : 1;
+    
+    // 預測下一輪的成本效益
+    const estimatedNextIterationCost = stats.averageTokensPerOperation * 0.01; // 假設每 token 0.01 美分
+    const predictedNextQuality = quality + improvementRate * 0.7; // 邊際遞減
+    const predictedCostEfficiency = predictedNextQuality / (stats.totalCost + estimatedNextIterationCost);
+    
+    const metrics = {
+      currentQuality: quality,
+      totalCost: stats.totalCost,
+      currentCostEfficiency,
+      improvementRate,
+      predictedCostEfficiency,
+      improvementDeclining: improvementRate < 0.1,
+      costEfficiencyDeclining: predictedCostEfficiency < currentCostEfficiency * 0.8,
+      budgetConcern: budgetStatus.usagePercentage && budgetStatus.usagePercentage > 70
+    };
+
+    // 智能決策邏輯
+    let shouldContinue = true;
+    let reason = '繼續優化';
+    let confidence = 0.7;
+
+    // 1. 預算警告檢查
+    if (budgetStatus.usagePercentage && budgetStatus.usagePercentage > 85) {
+      shouldContinue = false;
+      reason = `預算使用率過高 (${budgetStatus.usagePercentage.toFixed(1)}%)`;
+      confidence = 0.9;
+    }
+    // 2. 成本效益持續下降
+    else if (metrics.costEfficiencyDeclining && metrics.improvementDeclining) {
+      shouldContinue = false;
+      reason = '成本效益和改進率雙重下降，達到最佳停止點';
+      confidence = 0.85;
+    }
+    // 3. 改進率極低
+    else if (improvementRate < 0.05 && this.currentIteration >= 2) {
+      shouldContinue = false;
+      reason = `改進率過低 (${(improvementRate * 100).toFixed(1)}%)，邊際效益不佳`;
+      confidence = 0.8;
+    }
+    // 4. 品質已達高水準且成本上升
+    else if (quality >= 8.5 && stats.totalCost > 5.0) {
+      shouldContinue = false;
+      reason = `品質已達標 (${quality.toFixed(1)}/10)，成本效益考量建議停止`;
+      confidence = 0.75;
+    }
+    // 5. 時間效率考量
+    else if (duration > 300000 && improvementRate < 0.1) { // 5分鐘且改進慢
+      shouldContinue = false;
+      reason = '時間效率低，建議停止以控制成本';
+      confidence = 0.7;
+    }
+
+    // 記錄決策分析
+    this.emit('cost-efficiency-analysis', {
+      iteration: this.currentIteration,
+      decision: { shouldContinue, reason, confidence },
+      metrics
+    });
+
+    console.log(`📊 成本效益分析 - 迭代 ${this.currentIteration}:`);
+    console.log(`  品質: ${quality.toFixed(1)}/10`);
+    console.log(`  成本: $${stats.totalCost.toFixed(4)}`);
+    console.log(`  效率: ${currentCostEfficiency.toFixed(2)} 品質/美元`);
+    console.log(`  改進率: ${(improvementRate * 100).toFixed(1)}%`);
+    console.log(`  決策: ${shouldContinue ? '繼續' : '停止'} (信心度: ${(confidence * 100).toFixed(0)}%)`);
+
+    return { shouldContinue, reason, confidence, metrics };
   }
 
   /**

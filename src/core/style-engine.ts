@@ -52,38 +52,88 @@ class StyledAgent extends BaseAgent {
   }
 
   /**
-   * 實現抽象方法：獲取初始提示詞
+   * 實現抽象方法：獲取初始提示詞（優化版）
    */
   protected getInitialPrompt(task: string): string {
-    // 使用配置中的提示詞模板
-    const prompt = this.formatPrompt(this.agentConfig.prompts.mission, { mission: task });
+    // 使用配置中的提示詞模板並優化
+    const missionTemplate = this.agentConfig.prompts.mission;
+    const optimizedPrompt = this.optimizeMissionPrompt(missionTemplate, task);
     
     // 設置思考深度
     const thinkingCommand = this.getThinkingCommand();
     
-    // 構建完整指令
-    return `${this.basePrompt}\n\n${thinkingCommand}\n\n${prompt}`;
+    // 構建完整指令（更簡潔的格式）
+    return `${this.basePrompt}\n${thinkingCommand}\n任務: ${task}\n${optimizedPrompt}`;
   }
 
   /**
-   * 構建基礎提示詞
+   * 優化任務 prompt，壓縮執行步驟
+   */
+  private optimizeMissionPrompt(template: string, task: string): string {
+    // 檢查是否有詳細的執行步驟列表
+    const stepsMatch = template.match(/請執行以下步驟：\s*((?:\d+\. .+\n?)+)/);
+    if (stepsMatch) {
+      const steps = stepsMatch[1]
+        .split('\n')
+        .filter(line => line.trim().match(/^\d+\./))
+        .map(line => {
+          // 提取步驟的關鍵詞（前2-3個字）
+          const content = line.replace(/^\d+\.\s*/, '');
+          const keywords = content.split('').slice(0, 4).join('');
+          return keywords;
+        })
+        .join('→');
+      
+      return `執行: ${steps}`;
+    }
+    
+    // 如果沒有步驟列表，移除冗餘內容
+    const cleanTemplate = template
+      .replace(/任務：{{mission}}\s*/, '')
+      .replace(/請執行以下步驟：.*$/s, '')
+      .trim();
+    
+    return cleanTemplate || `執行: 分析→計畫→實施`;
+  }
+
+  /**
+   * 構建基礎提示詞（優化版）
    */
   private buildBasePrompt(): string {
     const { personality, prompts } = this.agentConfig;
     
-    let basePrompt = prompts.initial || '';
+    // 使用壓縮格式的角色定位
+    const roleIntro = `${this.role} (${personality.name}) - ${personality.approach}思維`;
     
-    // 添加人格特質
-    if (personality.traits && personality.traits.length > 0) {
-      basePrompt += `\n\n你的特質：\n${personality.traits.map(t => `- ${t}`).join('\n')}`;
+    // 簡化特質描述（用符號分隔）
+    const traits = personality.traits && personality.traits.length > 0 
+      ? `特質: ${personality.traits.join('|')}` 
+      : '';
+    
+    // 提取核心原則（如果有的話）
+    const corePrompt = prompts.initial || '';
+    
+    // 構建簡潔的基礎 prompt
+    if (corePrompt.includes('核心原則')) {
+      // 如果有核心原則，提取並簡化
+      const principlesMatch = corePrompt.match(/核心原則：\s*((?:- .+\n?)+)/);
+      if (principlesMatch) {
+        const principles = principlesMatch[1]
+          .split('\n')
+          .filter(line => line.trim().startsWith('-'))
+          .map(line => line.replace(/^- /, '').split('').slice(0, 4).join('')) // 取前4個字
+          .join('|');
+        return `${roleIntro}\n原則: ${principles}${traits ? '\n' + traits : ''}`;
+      }
     }
     
-    // 添加工作方法
-    if (personality.approach) {
-      basePrompt += `\n\n工作方法：${personality.approach}`;
-    }
+    // 回退到原始 prompt，但移除重複的系統介紹
+    const cleanPrompt = corePrompt
+      .replace(/你是 PDCA 循環中的.+?代理，採用職人精神.+?\n/, '')
+      .replace(/請保持簡潔、精確、高品質的輸出。\s*/, '')
+      .trim();
     
-    return basePrompt;
+    return `${roleIntro}${traits ? '\n' + traits : ''}${cleanPrompt ? '\n' + cleanPrompt : ''}`;
   }
 
   /**
