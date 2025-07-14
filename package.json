@@ -1,6 +1,6 @@
 {
   "name": "pdca",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "🎯 AI 驅動的 PDCA 多代理開發系統 - 智能循環控制 + 成本管理 + Token 優化 + 多 AI 引擎支援",
   "type": "module",
   "main": "./dist/index.js",
